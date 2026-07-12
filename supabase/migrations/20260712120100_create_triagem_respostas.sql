@@ -2,6 +2,10 @@ create table public.triagem_respostas (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references auth.users (id) on delete cascade,
   respostas jsonb not null default '{}'::jsonb,
+  -- cache do resultado de IA sobre `respostas`; sempre reescrito junto com `respostas`
+  -- no mesmo upsert, nunca calculado à parte (ver CLAUDE.md > Banco de dados)
+  perfil_calculado jsonb,
+  perfil_calculado_em timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
