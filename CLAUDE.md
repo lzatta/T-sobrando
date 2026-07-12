@@ -192,6 +192,16 @@ Adicionar dependências somente quando houver benefício claro.
 
 Sempre justificar novas dependências.
 
+## Instalação
+
+Antes de qualquer commit que altere package.json ou package-lock.json, é obrigatório:
+
+1. Rodar a instalação do zero, sem --legacy-peer-deps e sem --force: apagar node_modules e package-lock.json, rodar npm install puro, e confirmar que termina sem erro de ERESOLVE. Se só for possível instalar usando --legacy-peer-deps ou --force, isso significa que existe um conflito de versão real não resolvido — não commitar nesse estado, mesmo que o bundle compile. --legacy-peer-deps mascara um erro que vai aparecer no computador do Product Owner, que não usa essa flag.
+
+2. Antes de remover ou reintroduzir qualquer dependência, verificar se ela é usada em algum lugar do código (buscar o nome dela nos arquivos .ts/.tsx). Se uma dependência foi removida numa etapa anterior por não ter uso real, e ela aparecer de novo depois (por exemplo, reintroduzida indiretamente por outra dependência ou por engano), isso deve ser reportado explicitamente antes do commit, não silenciosamente resolvido ajustando versões.
+
+3. No resumo enviado ao Product Owner após qualquer mudança de dependência, informar explicitamente: "instalação testada do zero, sem legacy-peer-deps, sem erros" ou, caso não tenha sido possível testar assim, dizer isso com todas as letras em vez de omitir.
+
 ---
 
 # Refatoração
