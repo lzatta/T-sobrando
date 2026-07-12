@@ -100,7 +100,10 @@ Caso uma nova tabela seja realmente necessária:
 - explicar por que as tabelas atuais não resolvem o problema;
 - aguardar aprovação antes da migration.
 
-Evitar armazenar dados derivados quando eles puderem ser calculados.
+Dados derivados devem ser tratados de forma diferente dependendo do custo de recalcular:
+
+- Dado derivado barato e determinístico (cálculo simples, sem custo de API): nunca armazenar, sempre calcular na hora a partir da fonte.
+- Dado derivado caro ou gerado por IA (qualquer resultado de chamada a modelo de linguagem): armazenar como cache explícito, com um campo de timestamp indicando quando foi calculado. Esse cache deve ser sempre atualizado no mesmo momento em que a fonte muda — nunca pode ficar desatualizado silenciosamente.
 
 ---
 
