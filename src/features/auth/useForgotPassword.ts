@@ -15,6 +15,7 @@ export function useForgotPassword() {
       await resetPassword(data)
       setEmailSent(true)
     } catch (error) {
+      console.error('[useForgotPassword] falha ao enviar e-mail:', error)
       setAuthError(error instanceof Error ? error.message : 'Não foi possível enviar o e-mail')
     }
   }

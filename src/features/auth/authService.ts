@@ -9,6 +9,9 @@ export async function signIn({ email, password }: LoginInput) {
 export async function signUp({ email, password }: SignUpInput) {
   const { error } = await supabase.auth.signUp({ email, password })
   if (error) throw error
+  // com confirmação de e-mail desativada, signUp já retorna uma sessão ativa;
+  // encerra ela para a pessoa entrar deliberadamente pela tela de login
+  await supabase.auth.signOut()
 }
 
 export async function resetPassword({ email }: ForgotPasswordInput) {
