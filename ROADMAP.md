@@ -148,16 +148,18 @@ O V1 será considerado pronto quando o usuário conseguir:
 
 # Pendências bloqueantes antes de produção com usuários reais
 
-## Confirmação de e-mail desativada (temporário)
+## Confirmação de e-mail desativada + deep linking pendente
 
 Confirmação de e-mail está desativada no Supabase desde 13/07/2026, para não bloquear testes internos da Sprint 1.
 
 Antes de qualquer lançamento com usuários reais, é obrigatório:
 
 1. Reativar a confirmação de e-mail no Supabase (Authentication → Settings).
-2. Implementar deep linking no Expo Router para que o link do e-mail de confirmação abra o próprio app, em vez de cair numa URL web que não existe.
+2. Implementar deep linking no Expo Router para que os links enviados por e-mail abram o próprio app, em vez de caírem numa URL web que não existe.
 
-Sem isso, qualquer pessoa pode criar conta com e-mail que não é dela, sem nenhuma verificação — aceitável só durante testes internos, nunca em produção.
+Esse deep linking não é exclusivo da confirmação de cadastro: o link de **recuperação de senha** (`recuperar-senha`) depende exatamente da mesma configuração para funcionar de verdade, e hoje tem o mesmo problema — o link enviado por e-mail não abre o app. Os dois fluxos (confirmação de cadastro e recuperação de senha) só funcionam em produção depois dessa configuração ser feita.
+
+Sem isso: (a) qualquer pessoa pode criar conta com e-mail que não é dela, sem nenhuma verificação, e (b) a recuperação de senha não é utilizável de verdade — ambos aceitáveis só durante testes internos, nunca em produção.
 
 ---
 
