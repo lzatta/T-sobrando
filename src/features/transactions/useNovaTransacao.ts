@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useFocusEffect, useRouter } from 'expo-router'
+import { useCallback, useState } from 'react'
 import { listContas } from '../accounts/accountsService'
 import type { Conta } from '../accounts/types'
 import { listCategorias } from '../categories/categoriesService'
@@ -23,24 +23,26 @@ export function useNovaTransacao() {
   const [formError, setFormError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
-  useEffect(() => {
-    if (!session) return
-    async function carregarOpcoes() {
-      try {
-        const [dadosContas, dadosCategorias] = await Promise.all([
-          listContas(session!.user.id),
-          listCategorias(session!.user.id),
-        ])
-        setContas(dadosContas)
-        setCategorias(dadosCategorias)
-      } catch (error) {
-        console.error('[useNovaTransacao] falha ao carregar contas/categorias:', error)
-      } finally {
-        setIsLoadingOpcoes(false)
+  useFocusEffect(
+    useCallback(() => {
+      if (!session) return
+      async function carregarOpcoes() {
+        try {
+          const [dadosContas, dadosCategorias] = await Promise.all([
+            listContas(session!.user.id),
+            listCategorias(session!.user.id),
+          ])
+          setContas(dadosContas)
+          setCategorias(dadosCategorias)
+        } catch (error) {
+          console.error('[useNovaTransacao] falha ao carregar contas/categorias:', error)
+        } finally {
+          setIsLoadingOpcoes(false)
+        }
       }
-    }
-    carregarOpcoes()
-  }, [session])
+      carregarOpcoes()
+    }, [session])
+  )
 
   function alterarTipo(novoTipo: 'receita' | 'despesa') {
     setTipoState(novoTipo)

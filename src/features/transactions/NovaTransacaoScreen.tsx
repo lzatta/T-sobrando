@@ -1,3 +1,4 @@
+import { Link } from 'expo-router'
 import { ScrollView, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
@@ -9,6 +10,7 @@ export function NovaTransacaoScreen() {
   const {
     contas,
     categoriasFiltradas,
+    isLoadingOpcoes,
     tipo,
     alterarTipo,
     valor,
@@ -24,13 +26,13 @@ export function NovaTransacaoScreen() {
     salvar,
   } = useNovaTransacao()
 
+  const semContas = !isLoadingOpcoes && contas.length === 0
+
   return (
     <ScrollView
       className="flex-1 bg-background dark:bg-background-dark"
-      contentContainerClassName="gap-16 px-24 pt-64 pb-32"
+      contentContainerClassName="gap-16 px-24 pt-24 pb-32"
     >
-      <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">Nova transação</Text>
-
       <SegmentedToggle
         opcoes={[
           { value: 'despesa', label: 'Despesa' },
@@ -50,14 +52,25 @@ export function NovaTransacaoScreen() {
 
       <View className="gap-8">
         <Text className="text-text-secondary dark:text-text-secondary-dark">Conta</Text>
-        {contas.map((conta) => (
-          <OpcaoCard
-            key={conta.id}
-            label={conta.nome}
-            selected={accountId === conta.id}
-            onPress={() => setAccountId(conta.id)}
-          />
-        ))}
+        {semContas ? (
+          <View className="gap-8">
+            <Text className="text-text-secondary dark:text-text-secondary-dark">
+              Você ainda não tem nenhuma conta cadastrada.
+            </Text>
+            <Link href="/(app)/contas" className="text-primary">
+              Criar uma conta
+            </Link>
+          </View>
+        ) : (
+          contas.map((conta) => (
+            <OpcaoCard
+              key={conta.id}
+              label={conta.nome}
+              selected={accountId === conta.id}
+              onPress={() => setAccountId(conta.id)}
+            />
+          ))
+        )}
       </View>
 
       {categoriasFiltradas.length > 0 && (
@@ -76,7 +89,7 @@ export function NovaTransacaoScreen() {
 
       {formError ? <Text className="text-error">{formError}</Text> : null}
 
-      <Button label="Salvar" onPress={salvar} loading={isSaving} />
+      <Button label="Salvar" onPress={salvar} loading={isSaving} disabled={semContas} />
     </ScrollView>
   )
 }

@@ -1,4 +1,4 @@
-import { useFocusEffect } from '@react-navigation/native'
+import { useFocusEffect } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { useSession } from '../../stores/AuthContext'
 import { deleteTransacao, listTransacoes } from './transactionsService'
