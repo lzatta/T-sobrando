@@ -49,7 +49,7 @@ Funcionalidades:
 
 Status:
 
-⬜ Não iniciado
+✅ Concluído (perfil_calculado da triagem adiado deliberadamente para a Sprint 4 — motor de recomendações; respostas já são coletadas e armazenadas)
 
 ---
 
