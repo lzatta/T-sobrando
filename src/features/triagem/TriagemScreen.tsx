@@ -1,6 +1,6 @@
 import { Text, TextInput, View } from 'react-native'
 import { Button } from '../../components/Button'
-import { OpcaoCard } from './components/OpcaoCard'
+import { OpcaoCard } from '../../components/OpcaoCard'
 import { useTriagem } from './useTriagem'
 
 export function TriagemScreen() {
