@@ -37,51 +37,54 @@ export function AccountsScreen() {
   }
 
   return (
-    <View className="flex-1 gap-16 bg-background px-24 pt-64 dark:bg-background-dark">
-      <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">Contas</Text>
+    <FlatList
+      className="flex-1 bg-background dark:bg-background-dark"
+      contentContainerClassName="gap-16 px-24 pb-32"
+      data={contas}
+      keyExtractor={(item) => item.id}
+      refreshing={isLoading}
+      ListHeaderComponent={
+        <View className="gap-16 pb-16">
+          <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">Contas</Text>
 
-      <Card className="gap-12">
-        <Input label="Nome" value={nome} onChangeText={setNome} error={formError ?? undefined} />
-        <Input
-          label="Saldo inicial"
-          keyboardType="numeric"
-          value={saldoInicial}
-          onChangeText={setSaldoInicial}
-        />
-        <View className="gap-8">
-          {TIPOS_CONTA.map((opcao) => (
-            <OpcaoCard
-              key={opcao.value}
-              label={opcao.label}
-              selected={tipo === opcao.value}
-              onPress={() => setTipo(opcao.value)}
+          <Card className="gap-12">
+            <Input label="Nome" value={nome} onChangeText={setNome} error={formError ?? undefined} />
+            <Input
+              label="Saldo inicial"
+              keyboardType="numeric"
+              value={saldoInicial}
+              onChangeText={setSaldoInicial}
             />
-          ))}
-        </View>
-        <Button label="Adicionar conta" onPress={handleAdicionar} loading={isSaving} />
-      </Card>
-
-      {error ? <Text className="text-error">{error}</Text> : null}
-
-      <FlatList
-        data={contas}
-        keyExtractor={(item) => item.id}
-        refreshing={isLoading}
-        contentContainerClassName="gap-12"
-        renderItem={({ item }) => (
-          <Card className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-text-primary dark:text-text-primary-dark">{item.nome}</Text>
-              <Text className="text-text-secondary dark:text-text-secondary-dark">
-                {TIPOS_CONTA.find((t) => t.value === item.tipo)?.label}
-              </Text>
+            <View className="gap-8">
+              {TIPOS_CONTA.map((opcao) => (
+                <OpcaoCard
+                  key={opcao.value}
+                  label={opcao.label}
+                  selected={tipo === opcao.value}
+                  onPress={() => setTipo(opcao.value)}
+                />
+              ))}
             </View>
-            <Pressable onPress={() => remover(item.id)}>
-              <Text className="text-error">Excluir</Text>
-            </Pressable>
+            <Button label="Adicionar conta" onPress={handleAdicionar} loading={isSaving} />
           </Card>
-        )}
-      />
-    </View>
+
+          {error ? <Text className="text-error">{error}</Text> : null}
+        </View>
+      }
+      ItemSeparatorComponent={() => <View className="h-12" />}
+      renderItem={({ item }) => (
+        <Card className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-text-primary dark:text-text-primary-dark">{item.nome}</Text>
+            <Text className="text-text-secondary dark:text-text-secondary-dark">
+              {TIPOS_CONTA.find((t) => t.value === item.tipo)?.label}
+            </Text>
+          </View>
+          <Pressable onPress={() => remover(item.id)}>
+            <Text className="text-error">Excluir</Text>
+          </Pressable>
+        </Card>
+      )}
+    />
   )
 }
