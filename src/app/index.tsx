@@ -1,11 +1,11 @@
 import { Redirect } from 'expo-router'
 import { ActivityIndicator, View } from 'react-native'
-import { useSession } from '../stores/AuthContext'
+import { useEntryRoute } from '../hooks/useEntryRoute'
 
 export default function Index() {
-  const { session, isLoading } = useSession()
+  const route = useEntryRoute()
 
-  if (isLoading) {
+  if (route === 'loading') {
     return (
       <View className="flex-1 items-center justify-center bg-background dark:bg-background-dark">
         <ActivityIndicator />
@@ -13,9 +13,5 @@ export default function Index() {
     )
   }
 
-  if (!session) {
-    return <Redirect href="/(auth)/login" />
-  }
-
-  return <Redirect href="/(app)" />
+  return <Redirect href={route} />
 }
