@@ -55,3 +55,26 @@ O wireframe foi desenhado pensando em layout de desktop (colunas lado a lado, ba
 1. Incluir Top Movimentações e Top Categorias na Sprint 2 atual? (custo baixo, dado derivado)
 2. Incluir a tabela de Dívidas (sem simulador) na Sprint 2, ou deixar para uma sprint própria?
 3. Simulador de quitação de dívida: confirmado como funcionalidade separada, de sprint futura (não Sprint 2).
+
+## 6. Redesenho de "Contas" — decisão tomada após teste real da Sprint 2
+
+O modelo original de tipos genéricos (conta corrente, carteira, poupança, cartão de crédito, investimento) se mostrou confuso na prática e foi revisado:
+
+- Cartão de crédito não é conta — é uma linha de crédito, representando dívida futura (fatura), não saldo positivo guardado. Removido de "Contas"; passa a pertencer à Sprint 6 — Dívidas e Passivos, como mais um tipo de dívida/parcelamento.
+- "Carteira" (dinheiro em espécie) removida do V1 — reconhecida como um conceito legítimo (uso comum de dinheiro físico no Brasil), mas que merece uma tela/feature própria no futuro, não um tipo genérico dentro de "Contas". Fica registrada como ideia de roadmap, não implementada agora.
+- Novo modelo de "Contas": o propósito da tela é simples — o usuário saber quanto tem em cada lugar. O fluxo passa a ser: escolher o banco/instituição (lista dos mais populares do Brasil + opção "Outro" com campo de texto livre), escolher o tipo (conta corrente ou poupança), e informar o saldo atual total.
+- Conta de corretora de investimento também aparece em "Contas", mostrando o saldo atual disponível ali — isso é diferente da feature completa de "Investimentos" do roadmap (que vai mostrar os ativos investidos, rendimentos, aportes). Em "Contas", é só mais um lugar onde o usuário tem dinheiro parado, com o mesmo tratamento das contas bancárias.
+- O campo permanece tecnicamente `saldo_inicial` no banco (representa o saldo no momento do cadastro daquela conta, ajustado depois pelas transações), mas a pergunta na tela deve ser formulada como "saldo atual", já que não há Open Finance ainda e o usuário precisa manter isso atualizado manualmente.
+
+### Mudanças no schema e na tela de Contas
+
+- Remover o tipo `cartao_credito` do enum de tipo de conta — cartão de crédito não pertence a "Contas". Isso vai ser tratado futuramente na Sprint 6 (Dívidas e Passivos), não implementado agora, só removido daqui.
+- Remover também o tipo `carteira` (dinheiro em espécie) do V1 — é uma ideia válida, mas fica registrada como roadmap futuro (feature própria), não como tipo dentro de Contas por enquanto.
+- O fluxo de criar uma conta passa a ser em duas escolhas: primeiro o banco/instituição, depois o tipo (conta corrente ou poupança). Lista de bancos populares no Brasil, com opção "Outro" liberando um campo de texto livre para o nome: Nubank, Itaú, Bradesco, Banco do Brasil, Caixa Econômica Federal, Santander, Banco Inter, C6 Bank, BTG Pactual, XP Investimentos, PicPay, Mercado Pago, Neon, Outro.
+- Corretoras de investimento (ex: XP, BTG) também aparecem nessa mesma lista de bancos/instituições, com o mesmo tratamento — o usuário informa o saldo disponível ali, sem relação com a feature completa de Investimentos do roadmap (que trata de ativos, rendimentos, aportes — isso é outra coisa, mais pra frente).
+- Tipo de conta, agora só duas opções: conta corrente ou poupança.
+- O campo continua `saldo_inicial` na estrutura do banco, mas a pergunta na tela deve ser "Qual o saldo atual dessa conta?" — sempre saldo total, nunca "inicial" do ponto de vista do usuário.
+
+### Sobre a conta padrão criada automaticamente no cadastro
+
+Como o tipo `carteira` foi removido, a automação que cria uma conta "Carteira" no signup também precisa mudar. Sugestão em avaliação: manter a criação automática de uma conta padrão no cadastro (baixa fricção continua importante), mas renomeada para algo genérico tipo "Minha conta principal", sem banco/tipo fixo pré-definido, que o usuário edita depois com os dados reais.
