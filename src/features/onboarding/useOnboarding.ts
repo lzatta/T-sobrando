@@ -11,7 +11,13 @@ export function useOnboarding() {
   const [isFinishing, setIsFinishing] = useState(false)
 
   const isLastStep = stepIndex === ONBOARDING_STEPS.length - 1
+  const isFirstStep = stepIndex === 0
   const step = ONBOARDING_STEPS[stepIndex]
+
+  function voltar() {
+    if (isFirstStep) return
+    setStepIndex((current) => current - 1)
+  }
 
   async function avancar() {
     if (!isLastStep) {
@@ -31,5 +37,5 @@ export function useOnboarding() {
     }
   }
 
-  return { step, isLastStep, isFinishing, avancar }
+  return { step, isFirstStep, isLastStep, isFinishing, avancar, voltar }
 }

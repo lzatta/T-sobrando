@@ -3,7 +3,7 @@ import { Button } from '../../components/Button'
 import { useOnboarding } from './useOnboarding'
 
 export function OnboardingScreen() {
-  const { step, isLastStep, isFinishing, avancar } = useOnboarding()
+  const { step, isFirstStep, isLastStep, isFinishing, avancar, voltar } = useOnboarding()
 
   return (
     <View className="flex-1 justify-center gap-24 bg-background px-24 dark:bg-background-dark">
@@ -14,7 +14,10 @@ export function OnboardingScreen() {
         <Text className="text-text-secondary dark:text-text-secondary-dark">{step.descricao}</Text>
       </View>
 
-      <Button label={isLastStep ? 'Começar' : 'Próximo'} onPress={avancar} loading={isFinishing} />
+      <View className="gap-12">
+        <Button label={isLastStep ? 'Começar' : 'Próximo'} onPress={avancar} loading={isFinishing} />
+        {!isFirstStep && <Button label="Voltar" variant="secondary" onPress={voltar} />}
+      </View>
     </View>
   )
 }

@@ -1,4 +1,4 @@
-import { Text, TextInput, View } from 'react-native'
+import { ScrollView, Text, TextInput, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { OpcaoCard } from '../../components/OpcaoCard'
 import { useTriagem } from './useTriagem'
@@ -6,6 +6,7 @@ import { useTriagem } from './useTriagem'
 export function TriagemScreen() {
   const {
     pergunta,
+    isFirstStep,
     isLastStep,
     podeAvancar,
     respostas,
@@ -15,10 +16,14 @@ export function TriagemScreen() {
     atualizarTexto,
     atualizarOutro,
     avancar,
+    voltar,
   } = useTriagem()
 
   return (
-    <View className="flex-1 justify-center gap-24 bg-background px-24 dark:bg-background-dark">
+    <ScrollView
+      className="flex-1 bg-background dark:bg-background-dark"
+      contentContainerClassName="grow justify-center gap-24 px-24 py-24"
+    >
       <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">
         {pergunta.texto}
       </Text>
@@ -59,12 +64,15 @@ export function TriagemScreen() {
 
       {error ? <Text className="text-error">{error}</Text> : null}
 
-      <Button
-        label={isLastStep ? 'Concluir' : 'Próximo'}
-        onPress={avancar}
-        loading={isFinishing}
-        disabled={!podeAvancar}
-      />
-    </View>
+      <View className="gap-12">
+        <Button
+          label={isLastStep ? 'Concluir' : 'Próximo'}
+          onPress={avancar}
+          loading={isFinishing}
+          disabled={!podeAvancar}
+        />
+        {!isFirstStep && <Button label="Voltar" variant="secondary" onPress={voltar} />}
+      </View>
+    </ScrollView>
   )
 }

@@ -15,8 +15,14 @@ export function useTriagem() {
   const [error, setError] = useState<string | null>(null)
 
   const pergunta = PERGUNTAS[stepIndex]
+  const isFirstStep = stepIndex === 0
   const isLastStep = stepIndex === PERGUNTAS.length - 1
   const podeAvancar = pergunta.tipo === 'texto' || Boolean(respostas[pergunta.id])
+
+  function voltar() {
+    if (isFirstStep) return
+    setStepIndex((atual) => atual - 1)
+  }
 
   function selecionarOpcao(value: string) {
     if (pergunta.tipo !== 'escolha') return
@@ -55,6 +61,7 @@ export function useTriagem() {
 
   return {
     pergunta,
+    isFirstStep,
     isLastStep,
     podeAvancar,
     respostas,
@@ -64,5 +71,6 @@ export function useTriagem() {
     atualizarTexto,
     atualizarOutro,
     avancar,
+    voltar,
   }
 }
