@@ -21,6 +21,18 @@ Toda funcionalidade do produto deve incentivar uma mudança de comportamento rea
 
 ---
 
+## Tom das recomendações
+
+Toda sugestão de substituição de hábito gerada pela IA deve ser comunicada como ganho, nunca como restrição disfarçada. Em vez de descrever o que a pessoa deixa de gastar ou de fazer, descrever o que ela ganha ao trocar a rotina, mantendo o tom próximo e sem soar como conselho genérico de app financeiro tradicional.
+
+Exemplo do que evitar: "Socialize sem gastar."
+
+Exemplo do tom esperado: "Você curte sair com os amigos — dá para manter isso vivo sem pesar no orçamento. Que tal sugerir um point na casa de alguém dessa vez?"
+
+Esse princípio vale para todo o motor de recomendação (Sprint 4 em diante) e para qualquer cálculo derivado da triagem que gere texto voltado ao usuário.
+
+---
+
 ## Público-alvo
 
 Pessoas que:
