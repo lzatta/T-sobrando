@@ -214,6 +214,18 @@ Quanto menos dependências externas, melhor.
 
 ---
 
+# Débito técnico
+
+## Casts manuais de tipos do Supabase
+
+Existem casts manuais do tipo `as unknown as X[]` em `transactionsService.ts`, `dashboardService.ts` (e possivelmente em outros services que venham a fazer joins/embeds no futuro). Eles existem porque o client do Supabase (`@supabase/supabase-js`) não infere corretamente relações 1-para-1 (ex.: `accounts(nome)`, `categories(nome)`) sem tipos gerados a partir do schema real do banco — sem esses tipos, o client assume que todo embed é uma lista (`{ nome: any }[]`), mesmo quando a relação é de um único registro.
+
+A solução definitiva é rodar `supabase gen types typescript` e substituir os tipos manuais dos services pelos tipos gerados, eliminando a necessidade desses casts.
+
+Isso deve ser feito num momento de limpeza técnica dedicado, não durante uma sprint de feature nova — não bloqueia nenhuma funcionalidade atual, é só uma questão de tipagem mais correta e menos manutenção manual a cada novo service.
+
+---
+
 # Evolução do Projeto
 
 O projeto será desenvolvido em pequenos incrementos.
