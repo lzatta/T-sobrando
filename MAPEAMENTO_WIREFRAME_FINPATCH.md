@@ -78,3 +78,13 @@ O modelo original de tipos genéricos (conta corrente, carteira, poupança, cart
 ### Sobre a conta padrão criada automaticamente no cadastro
 
 Como o tipo `carteira` foi removido, a automação que cria uma conta "Carteira" no signup também precisa mudar. Sugestão em avaliação: manter a criação automática de uma conta padrão no cadastro (baixa fricção continua importante), mas renomeada para algo genérico tipo "Minha conta principal", sem banco/tipo fixo pré-definido, que o usuário edita depois com os dados reais.
+
+## 7. Ideia futura — gráficos de pizza no dashboard (não implementado ainda)
+
+Surgiu durante o teste da Sprint 2: o dashboard deveria ter 3 gráficos de pizza sobrepostos, navegáveis por arraste horizontal (swipe):
+
+1. Despesas vs. Receitas (só essas duas fatias)
+2. Distribuição por categoria, com cores diferentes e percentual
+3. Distribuição por transação individual, para visualizar o que mais consome o dinheiro
+
+Registrado como ideia de produto validada, mas não priorizada para implementação imediata — envolve escolha de biblioteca de gráfico (ou SVG customizado) e gesto de swipe entre telas sobrepostas, o que é escopo próprio, não uma correção pontual.
