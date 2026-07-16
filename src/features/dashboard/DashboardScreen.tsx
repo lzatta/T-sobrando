@@ -75,10 +75,10 @@ export function DashboardScreen() {
                       {item.descricao}
                     </Text>
                     <Text className="text-text-secondary dark:text-text-secondary-dark">
-                      {formatarMoeda(item.valor)} · {item.percentualDaReceita.toFixed(0)}%
+                      {formatarMoeda(item.valor)} · {item.percentualDoPeriodo.toFixed(0)}%
                     </Text>
                   </View>
-                  <BarraPercentual percentual={item.percentualDaReceita} />
+                  <BarraPercentual percentual={item.percentualDoPeriodo} />
                 </View>
               ))}
             </Card>
@@ -94,10 +94,10 @@ export function DashboardScreen() {
                   <View className="flex-row justify-between">
                     <Text className="text-text-primary dark:text-text-primary-dark">{item.categoriaNome}</Text>
                     <Text className="text-text-secondary dark:text-text-secondary-dark">
-                      {formatarMoeda(item.valorTotal)} · {item.percentualDaReceita.toFixed(0)}%
+                      {formatarMoeda(item.valorTotal)} · {item.percentualDoPeriodo.toFixed(0)}%
                     </Text>
                   </View>
-                  <BarraPercentual percentual={item.percentualDaReceita} />
+                  <BarraPercentual percentual={item.percentualDoPeriodo} />
                 </View>
               ))}
             </Card>

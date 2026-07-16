@@ -2,14 +2,14 @@ export type ItemTopMovimentacao = {
   id: string
   descricao: string
   valor: number
-  percentualDaReceita: number
+  percentualDoPeriodo: number
 }
 
 export type ItemTopCategoria = {
   categoriaId: string
   categoriaNome: string
   valorTotal: number
-  percentualDaReceita: number
+  percentualDoPeriodo: number
 }
 
 export type ResumoFinanceiro = {
