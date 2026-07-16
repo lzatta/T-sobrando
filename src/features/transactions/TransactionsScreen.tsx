@@ -2,7 +2,13 @@ import { Link } from 'expo-router'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { Button } from '../../components/Button'
 import { Card } from '../../components/Card'
+import { INSTITUICOES } from '../../constants/instituicoes'
 import { useTransactions } from './useTransactions'
+
+function nomeInstituicao(instituicao: string, instituicaoOutro: string | null) {
+  if (instituicao === 'outro') return instituicaoOutro || 'Outro'
+  return INSTITUICOES.find((item) => item.value === instituicao)?.label ?? instituicao
+}
 
 export function TransactionsScreen() {
   const { transacoes, isLoading, error, remover } = useTransactions()
@@ -15,14 +21,9 @@ export function TransactionsScreen() {
         <Button label="Nova transação" />
       </Link>
 
-      <View className="flex-row gap-16">
-        <Link href="/(app)/categorias" className="text-primary">
-          Categorias
-        </Link>
-        <Link href="/(app)/contas" className="text-primary">
-          Contas
-        </Link>
-      </View>
+      <Link href="/(app)/categorias" className="text-primary">
+        Categorias
+      </Link>
 
       {error ? <Text className="text-error">{error}</Text> : null}
 
@@ -38,7 +39,8 @@ export function TransactionsScreen() {
                 {item.descricao || item.categories?.nome || (item.tipo === 'receita' ? 'Receita' : 'Despesa')}
               </Text>
               <Text className="text-text-secondary dark:text-text-secondary-dark">
-                {item.accounts?.nome} · {new Date(item.data).toLocaleDateString('pt-BR')}
+                {nomeInstituicao(item.instituicao, item.instituicao_outro)} ·{' '}
+                {new Date(item.data).toLocaleDateString('pt-BR')}
               </Text>
             </View>
             <Text className={item.tipo === 'receita' ? 'font-semibold text-success' : 'font-semibold text-error'}>

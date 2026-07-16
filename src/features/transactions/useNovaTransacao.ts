@@ -1,7 +1,5 @@
 import { useFocusEffect, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
-import { listContas } from '../accounts/accountsService'
-import type { Conta } from '../accounts/types'
 import { listCategorias } from '../categories/categoriesService'
 import type { Categoria } from '../categories/types'
 import { useSession } from '../../stores/AuthContext'
@@ -11,13 +9,13 @@ import { transacaoSchema } from './types'
 export function useNovaTransacao() {
   const router = useRouter()
   const { session } = useSession()
-  const [contas, setContas] = useState<Conta[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [isLoadingOpcoes, setIsLoadingOpcoes] = useState(true)
 
   const [tipo, setTipoState] = useState<'receita' | 'despesa'>('despesa')
   const [valor, setValor] = useState('')
-  const [accountId, setAccountId] = useState<string | undefined>()
+  const [instituicao, setInstituicaoState] = useState<string | undefined>()
+  const [instituicaoOutro, setInstituicaoOutro] = useState('')
   const [categoryId, setCategoryId] = useState<string | undefined>()
   const [descricao, setDescricao] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
@@ -28,14 +26,10 @@ export function useNovaTransacao() {
       if (!session) return
       async function carregarOpcoes() {
         try {
-          const [dadosContas, dadosCategorias] = await Promise.all([
-            listContas(session!.user.id),
-            listCategorias(session!.user.id),
-          ])
-          setContas(dadosContas)
+          const dadosCategorias = await listCategorias(session!.user.id)
           setCategorias(dadosCategorias)
         } catch (error) {
-          console.error('[useNovaTransacao] falha ao carregar contas/categorias:', error)
+          console.error('[useNovaTransacao] falha ao carregar categorias:', error)
         } finally {
           setIsLoadingOpcoes(false)
         }
@@ -49,13 +43,19 @@ export function useNovaTransacao() {
     setCategoryId(undefined)
   }
 
+  function alterarInstituicao(novaInstituicao: string) {
+    setInstituicaoState(novaInstituicao)
+    if (novaInstituicao !== 'outro') setInstituicaoOutro('')
+  }
+
   const categoriasFiltradas = categorias.filter((categoria) => categoria.tipo === tipo)
 
   async function salvar() {
     const resultado = transacaoSchema.safeParse({
       tipo,
       valor,
-      account_id: accountId,
+      instituicao,
+      instituicao_outro: instituicaoOutro,
       category_id: categoryId,
       descricao,
     })
@@ -79,15 +79,16 @@ export function useNovaTransacao() {
   }
 
   return {
-    contas,
     categoriasFiltradas,
     isLoadingOpcoes,
     tipo,
     alterarTipo,
     valor,
     setValor,
-    accountId,
-    setAccountId,
+    instituicao,
+    alterarInstituicao,
+    instituicaoOutro,
+    setInstituicaoOutro,
     categoryId,
     setCategoryId,
     descricao,

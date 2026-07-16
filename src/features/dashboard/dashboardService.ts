@@ -12,12 +12,7 @@ type TransacaoBruta = {
 }
 
 export async function getResumoFinanceiro(userId: string): Promise<ResumoFinanceiro> {
-  const [
-    { data: contas, error: errContas },
-    { data: transacoesData, error: errTransacoes },
-    { data: assets, error: errAssets },
-  ] = await Promise.all([
-    supabase.from('accounts').select('saldo_inicial').eq('user_id', userId),
+  const [{ data: transacoesData, error: errTransacoes }, { data: assets, error: errAssets }] = await Promise.all([
     supabase
       .from('transactions')
       .select('id, tipo, valor, descricao, data, category_id, categories(nome)')
@@ -25,20 +20,20 @@ export async function getResumoFinanceiro(userId: string): Promise<ResumoFinance
     supabase.from('assets').select('valor_estimado').eq('user_id', userId),
   ])
 
-  if (errContas) throw errContas
   if (errTransacoes) throw errTransacoes
   if (errAssets) throw errAssets
 
   const transacoes = transacoesData as unknown as TransacaoBruta[]
 
-  const saldoInicialTotal = contas.reduce((soma, conta) => soma + Number(conta.saldo_inicial), 0)
+  // sem conta/saldo pré-cadastrado: o saldo começa do zero a partir da primeira
+  // transação registrada no app — dado inteiramente derivado, nunca armazenado
   const totalReceitas = transacoes
     .filter((t) => t.tipo === 'receita')
     .reduce((soma, t) => soma + Number(t.valor), 0)
   const totalDespesas = transacoes
     .filter((t) => t.tipo === 'despesa')
     .reduce((soma, t) => soma + Number(t.valor), 0)
-  const saldoAtual = saldoInicialTotal + totalReceitas - totalDespesas
+  const saldoAtual = totalReceitas - totalDespesas
 
   const hoje = new Date()
   const transacoesDoMes = transacoes.filter((t) => {

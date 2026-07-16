@@ -1,9 +1,13 @@
 import { z } from 'zod'
+import { INSTITUICAO_VALUES } from '../../constants/instituicoes'
 
 export const transacaoSchema = z.object({
   tipo: z.enum(['receita', 'despesa']),
   valor: z.coerce.number({ message: 'Informe um valor válido' }).positive('Informe um valor maior que zero'),
-  account_id: z.string().min(1, 'Selecione uma conta'),
+  instituicao: z.enum(INSTITUICAO_VALUES as [string, ...string[]], {
+    message: 'Selecione uma instituição',
+  }),
+  instituicao_outro: z.string().optional(),
   category_id: z.string().optional(),
   descricao: z.string().optional(),
 })
@@ -16,6 +20,7 @@ export type Transacao = {
   valor: number
   descricao: string | null
   data: string
-  accounts: { nome: string } | null
+  instituicao: string
+  instituicao_outro: string | null
   categories: { nome: string } | null
 }
