@@ -47,38 +47,26 @@ export async function getResumoFinanceiro(userId: string): Promise<ResumoFinance
     .filter((t) => t.tipo === 'despesa')
     .reduce((soma, t) => soma + Number(t.valor), 0)
 
-  // cada bloco tem sua própria base de 100% — receita e despesa são escalas diferentes,
-  // misturar as duas num único denominador produz percentuais sem sentido em conjunto
+  // Top Movimentações mistura receita e despesa de propósito (testado com blocos
+  // separados e revertido) — base única de 100% para o período inteiro
+  const totalAbsolutoDoMes = receitasDoMes + despesasDoMes
+  const percentualDoPeriodo = (valor: number) =>
+    totalAbsolutoDoMes > 0 ? (Math.abs(valor) / totalAbsolutoDoMes) * 100 : 0
+
+  const topMovimentacoes = [...transacoesDoMes]
+    .sort((a, b) => Number(b.valor) - Number(a.valor))
+    .slice(0, 5)
+    .map((t) => ({
+      id: t.id,
+      descricao: t.descricao || t.categories?.nome || (t.tipo === 'receita' ? 'Receita' : 'Despesa'),
+      valor: Number(t.valor),
+      percentualDoPeriodo: percentualDoPeriodo(Number(t.valor)),
+    }))
+
+  // Top Categorias é sempre despesa na prática, então a base do percentual continua
+  // despesasDoMes — isso não faz parte da reversão acima, categoria não é "movimentação"
   const percentualDeDespesa = (valor: number) =>
     despesasDoMes > 0 ? (Math.abs(valor) / despesasDoMes) * 100 : 0
-  const percentualDeReceita = (valor: number) =>
-    receitasDoMes > 0 ? (Math.abs(valor) / receitasDoMes) * 100 : 0
-
-  const topDespesas = transacoesDoMes
-    .filter((t) => t.tipo === 'despesa')
-    .sort((a, b) => Number(b.valor) - Number(a.valor))
-    .slice(0, 5)
-    .map((t) => ({
-      id: t.id,
-      descricao: t.descricao || t.categories?.nome || 'Despesa',
-      valor: Number(t.valor),
-      percentualDoPeriodo: percentualDeDespesa(Number(t.valor)),
-    }))
-
-  const topReceitas = transacoesDoMes
-    .filter((t) => t.tipo === 'receita')
-    .sort((a, b) => Number(b.valor) - Number(a.valor))
-    .slice(0, 5)
-    .map((t) => ({
-      id: t.id,
-      descricao: t.descricao || t.categories?.nome || 'Receita',
-      valor: Number(t.valor),
-      percentualDoPeriodo: percentualDeReceita(Number(t.valor)),
-    }))
-
-  // categorias são só de despesa na prática (o filtro abaixo confirma isso: nenhuma
-  // transação de receita entra na soma), então a base de 100% é despesasDoMes, igual
-  // ao Top Despesas — não a soma combinada de receita + despesa
   const somaPorCategoria = new Map<string, { nome: string; total: number }>()
   transacoesDoMes
     .filter((t) => t.tipo === 'despesa')
@@ -107,8 +95,7 @@ export async function getResumoFinanceiro(userId: string): Promise<ResumoFinance
     despesasDoMes,
     sobrouDoMes: receitasDoMes - despesasDoMes,
     patrimonioTotal: patrimonioAssets + saldoAtual,
-    topDespesas,
-    topReceitas,
+    topMovimentacoes,
     topCategorias,
   }
 }
