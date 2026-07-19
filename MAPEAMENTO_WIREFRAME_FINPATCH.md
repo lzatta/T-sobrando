@@ -79,12 +79,16 @@ O modelo original de tipos genéricos (conta corrente, carteira, poupança, cart
 
 Como o tipo `carteira` foi removido, a automação que cria uma conta "Carteira" no signup também precisa mudar. Sugestão em avaliação: manter a criação automática de uma conta padrão no cadastro (baixa fricção continua importante), mas renomeada para algo genérico tipo "Minha conta principal", sem banco/tipo fixo pré-definido, que o usuário edita depois com os dados reais.
 
-## 7. Ideia futura — gráficos de pizza no dashboard (não implementado ainda)
+## 7. Ideias futuras — visualizações gráficas do dashboard (não implementado ainda)
 
-Surgiu durante o teste da Sprint 2: o dashboard deveria ter 3 gráficos de pizza sobrepostos, navegáveis por arraste horizontal (swipe):
+Surgiram durante o teste da Sprint 2:
+
+**Gráficos de pizza** (3, sobrepostos, navegáveis por swipe horizontal):
 
 1. Despesas vs. Receitas (só essas duas fatias)
 2. Distribuição por categoria, com cores diferentes e percentual
 3. Distribuição por transação individual, para visualizar o que mais consome o dinheiro
 
-Registrado como ideia de produto validada, mas não priorizada para implementação imediata — envolve escolha de biblioteca de gráfico (ou SVG customizado) e gesto de swipe entre telas sobrepostas, o que é escopo próprio, não uma correção pontual.
+**Gráfico de linha — evolução patrimonial:** mostrando como o patrimônio total do usuário cresce ou diminui ao longo dos meses, já que o patrimônio passou a ser um acumulado histórico (ver correção aplicada), não um valor do mês corrente.
+
+Registrado como ideia de produto validada, mas não priorizada para implementação imediata — envolve escolha de biblioteca de gráfico (ou SVG customizado) e, no caso dos gráficos de pizza, gesto de swipe entre telas sobrepostas. Faz sentido avaliar as duas necessidades (pizza + linha) juntas na hora de escolher a biblioteca, para não decidir isso duas vezes separadas.
