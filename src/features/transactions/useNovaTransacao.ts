@@ -6,6 +6,13 @@ import { useSession } from '../../stores/AuthContext'
 import { createTransacao } from './transactionsService'
 import { transacaoSchema } from './types'
 
+function paraDataISO(data: Date) {
+  const ano = data.getFullYear()
+  const mes = String(data.getMonth() + 1).padStart(2, '0')
+  const dia = String(data.getDate()).padStart(2, '0')
+  return `${ano}-${mes}-${dia}`
+}
+
 export function useNovaTransacao() {
   const router = useRouter()
   const { session } = useSession()
@@ -18,6 +25,7 @@ export function useNovaTransacao() {
   const [instituicaoOutro, setInstituicaoOutro] = useState('')
   const [categoryId, setCategoryId] = useState<string | undefined>()
   const [descricao, setDescricao] = useState('')
+  const [data, setData] = useState(() => new Date())
   const [formError, setFormError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -58,6 +66,7 @@ export function useNovaTransacao() {
       instituicao_outro: instituicaoOutro,
       category_id: categoryId,
       descricao,
+      data: paraDataISO(data),
     })
     if (!resultado.success) {
       setFormError(resultado.error.issues[0].message)
@@ -93,6 +102,8 @@ export function useNovaTransacao() {
     setCategoryId,
     descricao,
     setDescricao,
+    data,
+    setData,
     formError,
     isSaving,
     salvar,

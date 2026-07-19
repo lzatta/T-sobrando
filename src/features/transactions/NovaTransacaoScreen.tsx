@@ -2,6 +2,7 @@ import { ScrollView, Text } from 'react-native'
 import { Button } from '../../components/Button'
 import { Input } from '../../components/Input'
 import { SegmentedToggle } from '../../components/SegmentedToggle'
+import { SeletorData } from '../../components/SeletorData'
 import { SeletorModal } from '../../components/SeletorModal'
 import { INSTITUICOES } from '../../constants/instituicoes'
 import { useNovaTransacao } from './useNovaTransacao'
@@ -21,6 +22,8 @@ export function NovaTransacaoScreen() {
     setCategoryId,
     descricao,
     setDescricao,
+    data,
+    setData,
     formError,
     isSaving,
     salvar,
@@ -45,6 +48,8 @@ export function NovaTransacaoScreen() {
       <Input label="Valor" keyboardType="numeric" value={valor} onChangeText={setValor} />
 
       <Input label="Descrição (opcional)" value={descricao} onChangeText={setDescricao} />
+
+      <SeletorData label="Data" valor={data} onChange={setData} maximumDate={new Date()} />
 
       <SeletorModal
         label="Instituição"

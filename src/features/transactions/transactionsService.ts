@@ -22,6 +22,7 @@ export async function createTransacao(userId: string, input: TransacaoInput) {
     tipo: dados.tipo,
     valor: dados.valor,
     descricao: dados.descricao || null,
+    data: dados.data,
   })
   if (error) throw error
 }

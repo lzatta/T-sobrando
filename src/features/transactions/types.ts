@@ -10,6 +10,7 @@ export const transacaoSchema = z.object({
   instituicao_outro: z.string().optional(),
   category_id: z.string().optional(),
   descricao: z.string().optional(),
+  data: z.string().min(1, 'Selecione uma data'),
 })
 
 export type TransacaoInput = z.infer<typeof transacaoSchema>
