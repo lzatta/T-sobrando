@@ -1,4 +1,4 @@
-export type ItemTopMovimentacao = {
+export type ItemTopTransacao = {
   id: string
   descricao: string
   valor: number
@@ -18,6 +18,7 @@ export type ResumoFinanceiro = {
   despesasDoMes: number
   sobrouDoMes: number
   patrimonioTotal: number
-  topMovimentacoes: ItemTopMovimentacao[]
+  topDespesas: ItemTopTransacao[]
+  topReceitas: ItemTopTransacao[]
   topCategorias: ItemTopCategoria[]
 }

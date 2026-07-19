@@ -50,25 +50,39 @@ export function DashboardScreen() {
           </View>
 
           <Card>
-            <Text className="text-text-secondary dark:text-text-secondary-dark">Saldo atual</Text>
-            <Text className="text-lg font-semibold text-text-primary dark:text-text-primary-dark">
-              {formatarMoeda(resumo.saldoAtual)}
-            </Text>
-          </Card>
-
-          <Card>
             <Text className="text-text-secondary dark:text-text-secondary-dark">Patrimônio total</Text>
             <Text className="text-lg font-semibold text-text-primary dark:text-text-primary-dark">
               {formatarMoeda(resumo.patrimonioTotal)}
             </Text>
           </Card>
 
-          {resumo.topMovimentacoes.length > 0 && (
+          {resumo.topDespesas.length > 0 && (
             <Card className="gap-12">
               <Text className="font-semibold text-text-primary dark:text-text-primary-dark">
-                Top movimentações do mês
+                Top despesas do mês
               </Text>
-              {resumo.topMovimentacoes.map((item) => (
+              {resumo.topDespesas.map((item) => (
+                <View key={item.id} className="gap-4">
+                  <View className="flex-row justify-between">
+                    <Text className="flex-1 text-text-primary dark:text-text-primary-dark" numberOfLines={1}>
+                      {item.descricao}
+                    </Text>
+                    <Text className="text-text-secondary dark:text-text-secondary-dark">
+                      {formatarMoeda(item.valor)} · {item.percentualDoPeriodo.toFixed(0)}%
+                    </Text>
+                  </View>
+                  <BarraPercentual percentual={item.percentualDoPeriodo} />
+                </View>
+              ))}
+            </Card>
+          )}
+
+          {resumo.topReceitas.length > 0 && (
+            <Card className="gap-12">
+              <Text className="font-semibold text-text-primary dark:text-text-primary-dark">
+                Top receitas do mês
+              </Text>
+              {resumo.topReceitas.map((item) => (
                 <View key={item.id} className="gap-4">
                   <View className="flex-row justify-between">
                     <Text className="flex-1 text-text-primary dark:text-text-primary-dark" numberOfLines={1}>
