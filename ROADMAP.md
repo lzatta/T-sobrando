@@ -70,7 +70,7 @@ Funcionalidades:
 
 Status:
 
-⬜ Não iniciado
+✅ Concluído ("Contas" foi redesenhado para instituição direto na transação, sem cadastro de conta separado — decisão registrada em MAPEAMENTO_WIREFRAME_FINPATCH.md)
 
 ---
 
