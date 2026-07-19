@@ -23,7 +23,7 @@ export function useNovaTransacao() {
   const [valor, setValor] = useState('')
   const [instituicao, setInstituicaoState] = useState<string | undefined>()
   const [instituicaoOutro, setInstituicaoOutro] = useState('')
-  const [categoryId, setCategoryId] = useState<string | undefined>()
+  const [categoryId, setCategoryId] = useState('')
   const [descricao, setDescricao] = useState('')
   const [data, setData] = useState(() => new Date())
   const [formError, setFormError] = useState<string | null>(null)
@@ -48,7 +48,7 @@ export function useNovaTransacao() {
 
   function alterarTipo(novoTipo: 'receita' | 'despesa') {
     setTipoState(novoTipo)
-    setCategoryId(undefined)
+    setCategoryId('')
   }
 
   function alterarInstituicao(novaInstituicao: string) {

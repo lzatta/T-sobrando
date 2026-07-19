@@ -8,7 +8,7 @@ export const transacaoSchema = z.object({
     message: 'Selecione uma instituição',
   }),
   instituicao_outro: z.string().optional(),
-  category_id: z.string().optional(),
+  category_id: z.string().min(1, 'Selecione uma categoria'),
   descricao: z.string().optional(),
   data: z.string().min(1, 'Selecione uma data'),
 })

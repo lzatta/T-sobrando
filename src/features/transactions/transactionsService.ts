@@ -18,7 +18,7 @@ export async function createTransacao(userId: string, input: TransacaoInput) {
     user_id: userId,
     instituicao: dados.instituicao,
     instituicao_outro: dados.instituicao === 'outro' ? dados.instituicao_outro || null : null,
-    category_id: dados.category_id || null,
+    category_id: dados.category_id,
     tipo: dados.tipo,
     valor: dados.valor,
     descricao: dados.descricao || null,
