@@ -10,6 +10,8 @@ export default function AppLayout() {
         name="extrato-instituicao"
         options={{ headerShown: true, title: 'Extrato por instituição' }}
       />
+      <Stack.Screen name="patrimonio" options={{ headerShown: true, title: 'Patrimônio' }} />
+      <Stack.Screen name="nova-meta" options={{ headerShown: true, title: 'Nova meta' }} />
     </Stack>
   )
 }

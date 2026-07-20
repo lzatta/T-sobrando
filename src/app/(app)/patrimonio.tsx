@@ -1,3 +1,3 @@
-import { AssetsScreen } from '../../../features/assets/AssetsScreen'
+import { AssetsScreen } from '../../features/assets/AssetsScreen'
 
 export default AssetsScreen

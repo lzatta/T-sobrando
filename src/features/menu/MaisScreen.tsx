@@ -18,6 +18,14 @@ export function MaisScreen() {
         <Button label="Sair" variant="secondary" onPress={submit} loading={isSigningOut} />
       </Card>
 
+      <Link href="/(app)/patrimonio" asChild>
+        <Pressable>
+          <Card>
+            <Text className="text-text-primary dark:text-text-primary-dark">Patrimônio</Text>
+          </Card>
+        </Pressable>
+      </Link>
+
       <Link href="/(app)/categorias" asChild>
         <Pressable>
           <Card>
