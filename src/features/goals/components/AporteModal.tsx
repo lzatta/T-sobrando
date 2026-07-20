@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Modal, Pressable, Text } from 'react-native'
+import { KeyboardAvoidingView, Modal, Platform, Pressable, Text } from 'react-native'
 import { Button } from '../../../components/Button'
-import { Input } from '../../../components/Input'
+import { CampoMonetario } from '../../../components/CampoMonetario'
 import { calcularReducaoDias } from '../calcularAporte'
 import { aportar } from '../goalsService'
 import { aporteSchema, type Meta } from '../types'
@@ -52,37 +52,39 @@ export function AporteModal({ meta, onFechar, onConfirmado }: AporteModalProps) 
   return (
     <Modal visible={meta !== null} transparent animationType="slide" onRequestClose={fechar}>
       <Pressable className="flex-1 justify-end bg-black/50" onPress={fechar}>
-        <Pressable className="gap-16 rounded-t bg-background p-24 dark:bg-background-dark">
-          <Text className="text-lg font-semibold text-text-primary dark:text-text-primary-dark">
-            Aportar em {meta?.nome}
-          </Text>
-
-          <Input label="Valor do aporte" keyboardType="numeric" value={valor} onChangeText={setValor} />
-
-          {resultado?.tipo === 'concluida' && (
-            <Text className="font-semibold text-success">Esse aporte conclui a meta.</Text>
-          )}
-          {resultado?.tipo === 'prazo_vencido' && (
-            <Text className="text-text-secondary dark:text-text-secondary-dark">
-              O prazo dessa meta já passou — vale revisar a data.
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <Pressable className="gap-16 rounded-t bg-background p-24 dark:bg-background-dark">
+            <Text className="text-lg font-semibold text-text-primary dark:text-text-primary-dark">
+              Aportar em {meta?.nome}
             </Text>
-          )}
-          {resultado?.tipo === 'normal' &&
-            (resultado.diasReduzidos > 0 ? (
-              <Text className="text-text-secondary dark:text-text-secondary-dark">
-                Esse aporte reduz sua meta em {resultado.diasReduzidos}{' '}
-                {resultado.diasReduzidos === 1 ? 'dia' : 'dias'}.
-              </Text>
-            ) : (
-              <Text className="text-text-secondary dark:text-text-secondary-dark">
-                Esse aporte te aproxima da meta.
-              </Text>
-            ))}
 
-          {error ? <Text className="text-error">{error}</Text> : null}
+            <CampoMonetario label="Valor do aporte" value={valor} onChangeValue={setValor} />
 
-          <Button label="Confirmar aporte" onPress={confirmar} loading={isSaving} />
-        </Pressable>
+            {resultado?.tipo === 'concluida' && (
+              <Text className="font-semibold text-success">Esse aporte conclui a meta.</Text>
+            )}
+            {resultado?.tipo === 'prazo_vencido' && (
+              <Text className="text-text-secondary dark:text-text-secondary-dark">
+                O prazo dessa meta já passou — vale revisar a data.
+              </Text>
+            )}
+            {resultado?.tipo === 'normal' &&
+              (resultado.diasReduzidos > 0 ? (
+                <Text className="text-text-secondary dark:text-text-secondary-dark">
+                  Esse aporte reduz sua meta em {resultado.diasReduzidos}{' '}
+                  {resultado.diasReduzidos === 1 ? 'dia' : 'dias'}.
+                </Text>
+              ) : (
+                <Text className="text-text-secondary dark:text-text-secondary-dark">
+                  Esse aporte te aproxima da meta.
+                </Text>
+              ))}
+
+            {error ? <Text className="text-error">{error}</Text> : null}
+
+            <Button label="Confirmar aporte" onPress={confirmar} loading={isSaving} />
+          </Pressable>
+        </KeyboardAvoidingView>
       </Pressable>
     </Modal>
   )

@@ -1,5 +1,6 @@
-import { ScrollView, Text } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, Text } from 'react-native'
 import { Button } from '../../components/Button'
+import { CampoMonetario } from '../../components/CampoMonetario'
 import { Input } from '../../components/Input'
 import { SeletorData } from '../../components/SeletorData'
 import { SeletorModal } from '../../components/SeletorModal'
@@ -24,29 +25,31 @@ export function NovaMetaScreen() {
   } = useNovaMeta()
 
   return (
-    <ScrollView
-      className="flex-1 bg-background dark:bg-background-dark"
-      contentContainerClassName="gap-16 px-24 pt-24 pb-32"
-    >
-      <Input label="Nome da meta" value={nome} onChangeText={setNome} />
+    <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView
+        className="flex-1 bg-background dark:bg-background-dark"
+        contentContainerClassName="gap-16 px-24 pt-24 pb-32"
+      >
+        <Input label="Nome da meta" value={nome} onChangeText={setNome} />
 
-      <SeletorModal
-        label="Categoria"
-        opcoes={CATEGORIAS_META}
-        valor={categoria}
-        onChange={alterarCategoria}
-        placeholder="Selecione a categoria"
-      />
+        <SeletorModal
+          label="Categoria"
+          opcoes={CATEGORIAS_META}
+          valor={categoria}
+          onChange={alterarCategoria}
+          placeholder="Selecione a categoria"
+        />
 
-      {categoria === 'outro' && <Input label="Qual?" value={categoriaOutro} onChangeText={setCategoriaOutro} />}
+        {categoria === 'outro' && <Input label="Qual?" value={categoriaOutro} onChangeText={setCategoriaOutro} />}
 
-      <Input label="Valor alvo" keyboardType="numeric" value={valorAlvo} onChangeText={setValorAlvo} />
+        <CampoMonetario label="Valor alvo" value={valorAlvo} onChangeValue={setValorAlvo} />
 
-      <SeletorData label="Prazo" valor={prazo} onChange={setPrazo} minimumDate={new Date()} />
+        <SeletorData label="Prazo" valor={prazo} onChange={setPrazo} minimumDate={new Date()} />
 
-      {formError ? <Text className="text-error">{formError}</Text> : null}
+        {formError ? <Text className="text-error">{formError}</Text> : null}
 
-      <Button label="Salvar" onPress={salvar} loading={isSaving} />
-    </ScrollView>
+        <Button label="Salvar" onPress={salvar} loading={isSaving} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
