@@ -3,15 +3,9 @@ import { useCallback, useState } from 'react'
 import { listCategorias } from '../categories/categoriesService'
 import type { Categoria } from '../categories/types'
 import { useSession } from '../../stores/AuthContext'
+import { paraDataISO } from '../../utils/data'
 import { createTransacao } from './transactionsService'
 import { transacaoSchema } from './types'
-
-function paraDataISO(data: Date) {
-  const ano = data.getFullYear()
-  const mes = String(data.getMonth() + 1).padStart(2, '0')
-  const dia = String(data.getDate()).padStart(2, '0')
-  return `${ano}-${mes}-${dia}`
-}
 
 export function useNovaTransacao() {
   const router = useRouter()

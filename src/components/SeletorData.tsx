@@ -6,10 +6,11 @@ type SeletorDataProps = {
   label: string
   valor: Date
   onChange: (data: Date) => void
+  minimumDate?: Date
   maximumDate?: Date
 }
 
-export function SeletorData({ label, valor, onChange, maximumDate }: SeletorDataProps) {
+export function SeletorData({ label, valor, onChange, minimumDate, maximumDate }: SeletorDataProps) {
   const [aberto, setAberto] = useState(false)
 
   return (
@@ -28,6 +29,7 @@ export function SeletorData({ label, valor, onChange, maximumDate }: SeletorData
           value={valor}
           mode="date"
           display="default"
+          minimumDate={minimumDate}
           maximumDate={maximumDate}
           onChange={(_event, dataSelecionada) => {
             setAberto(Platform.OS === 'ios')

@@ -1,6 +1,6 @@
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 import { Card } from '../../components/Card'
-import { BarraPercentual } from './components/BarraPercentual'
+import { BarraPercentual } from '../../components/BarraPercentual'
 import { useDashboard } from './useDashboard'
 
 function formatarMoeda(valor: number) {
