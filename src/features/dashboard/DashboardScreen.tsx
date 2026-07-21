@@ -1,6 +1,8 @@
+import { Link } from 'expo-router'
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
-import { Card } from '../../components/Card'
 import { BarraPercentual } from '../../components/BarraPercentual'
+import { BotaoMenu } from '../../components/BotaoMenu'
+import { Card } from '../../components/Card'
 import { useDashboard } from './useDashboard'
 
 function formatarMoeda(valor: number) {
@@ -23,7 +25,10 @@ export function DashboardScreen() {
       className="flex-1 bg-background dark:bg-background-dark"
       contentContainerClassName="gap-16 px-24 pt-64 pb-32"
     >
-      <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">Dashboard</Text>
+      <View className="flex-row items-center justify-between">
+        <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">Dashboard</Text>
+        <BotaoMenu />
+      </View>
 
       {error ? <Text className="text-error">{error}</Text> : null}
 
@@ -95,6 +100,10 @@ export function DashboardScreen() {
               ))}
             </Card>
           )}
+
+          <Link href="/(app)/transacoes" className="text-center text-primary">
+            Ver todas as transações
+          </Link>
         </>
       ) : null}
     </ScrollView>

@@ -2,6 +2,7 @@ import { Link } from 'expo-router'
 import { useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { BarraPercentual } from '../../components/BarraPercentual'
+import { BotaoMenu } from '../../components/BotaoMenu'
 import { Button } from '../../components/Button'
 import { Card } from '../../components/Card'
 import { SegmentedToggle } from '../../components/SegmentedToggle'
@@ -48,7 +49,10 @@ export function GoalsScreen() {
         refreshing={isLoading}
         ListHeaderComponent={
           <View className="gap-16 pb-4">
-            <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">Metas</Text>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">Metas</Text>
+              <BotaoMenu />
+            </View>
             <Link href="/(app)/nova-meta" asChild>
               <Button label="Nova meta" />
             </Link>

@@ -14,7 +14,7 @@ export function TransactionsScreen() {
   const { transacoes, isLoading, error, remover } = useTransactions()
 
   return (
-    <View className="flex-1 gap-16 bg-background px-24 pt-64 dark:bg-background-dark">
+    <View className="flex-1 gap-16 bg-background px-24 pt-24 dark:bg-background-dark">
       <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">Transações</Text>
 
       <Link href="/(app)/nova-transacao" asChild>
