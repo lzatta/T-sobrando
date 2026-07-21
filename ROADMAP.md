@@ -89,7 +89,7 @@ Funcionalidades:
 
 Status:
 
-⬜ Não iniciado
+✅ Concluído (inclui filtro por status — em andamento/concluída/vencida — e indicação visual de meta concluída/vencida na lista; status é dado derivado, calculado a partir de valor_atual, valor_alvo e prazo, sem coluna nova no banco)
 
 ---
 
