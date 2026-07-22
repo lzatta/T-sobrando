@@ -47,7 +47,7 @@ export function MenuLateral() {
           <Pressable onPress={(event) => event.stopPropagation()} className="flex-1 gap-24 px-24 pb-32">
             <View className="flex-row items-start justify-between">
               <View className="gap-12">
-                <View className="h-48 w-48 items-center justify-center rounded-full bg-primary">
+                <View className="h-[48px] w-[48px] items-center justify-center rounded-full bg-primary">
                   <Text className="text-lg font-semibold text-background">{inicial}</Text>
                 </View>
                 <View>
