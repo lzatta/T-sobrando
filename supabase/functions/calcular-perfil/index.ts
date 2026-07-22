@@ -46,6 +46,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Texto extraído literalmente de PRODUCT.md > "Tom das recomendações".
+// Vale pra todo texto gerado aqui (resumo, pontos_atencao, recomendacao_geral) —
+// o próprio PRODUCT.md diz que o princípio cobre "qualquer cálculo derivado da
+// triagem que gere texto voltado ao usuário", não só a recomendação.
+const TOM_RECOMENDACOES = `Toda sugestão de substituição de hábito gerada pela IA deve ser comunicada como ganho, nunca como restrição disfarçada. Em vez de descrever o que a pessoa deixa de gastar ou de fazer, descrever o que ela ganha ao trocar a rotina, mantendo o tom próximo e sem soar como conselho genérico de app financeiro tradicional.
+
+Exemplo do que evitar: "Socialize sem gastar."
+
+Exemplo do tom esperado: "Você curte sair com os amigos — dá para manter isso vivo sem pesar no orçamento. Que tal sugerir um point na casa de alguém dessa vez?"
+
+Esse princípio vale para todo texto que você gerar aqui — resumo, pontos_atencao e recomendacao_geral — não só para a recomendação final.`
+
 type Respostas = {
   perfil_gasto: string
   gatilho_principal: string
@@ -76,11 +88,6 @@ function montarPrompt(respostas: Respostas) {
     'A partir das respostas de triagem abaixo, monte um diagnóstico do padrão de comportamento financeiro do usuário.',
     '',
     ...linhas,
-    '',
-    'Regras de tom (obrigatórias):',
-    '- Nunca seja alarmista, culpabilizante ou prescritivo.',
-    '- Enquadre tudo em termos de ganho (ex.: "você curte X — dá para manter isso vivo sem pesar no orçamento"), nunca como proibição.',
-    '- Linguagem acolhedora, como uma conversa entre amigos, não como um relatório técnico.',
   ].join('\n')
 }
 
@@ -140,6 +147,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1024,
+        system: TOM_RECOMENDACOES,
         tool_choice: { type: 'tool', name: 'registrar_perfil' },
         tools: [
           {
