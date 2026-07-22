@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
+import { calcularPerfil } from '../habitos/habitosService'
 import { useSession } from '../../stores/AuthContext'
 import { saveTriagemRespostas } from './triagemService'
 import { PERGUNTAS, type TriagemRespostas } from './types'
@@ -51,6 +52,9 @@ export function useTriagem() {
     setIsFinishing(true)
     try {
       await saveTriagemRespostas(session.user.id, respostas as TriagemRespostas)
+      // dispara em segundo plano — não bloqueia a entrada no app; se falhar,
+      // a tela Hábitos oferece o botão "Calcular meu perfil" como retry manual
+      calcularPerfil().catch((err) => console.error('[useTriagem] falha ao calcular perfil:', err))
       router.replace('/(app)')
     } catch (err) {
       console.error('[useTriagem] falha ao salvar triagem:', err)
