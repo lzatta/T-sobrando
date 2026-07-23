@@ -14,7 +14,10 @@ export function useLogin() {
     setAuthError(null)
     try {
       await signIn(data)
-      router.replace('/(app)')
+      // '/' (não '/(app)') de propósito: deixa o useEntryRoute decidir entre
+      // onboarding/triagem/app com base no estado real do usuário, em vez de
+      // pular direto pro app e ignorar quem ainda não completou esses passos
+      router.replace('/')
     } catch (error) {
       console.error('[useLogin] falha ao entrar:', error)
       setAuthError(error instanceof Error ? error.message : 'Não foi possível entrar')
