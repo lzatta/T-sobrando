@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { signOut } from '../features/auth/authService'
 import { getOnboardingCompleted } from '../features/onboarding/onboardingService'
 import { getTriagemRespostas } from '../features/triagem/triagemService'
 import { useSession } from '../stores/AuthContext'
@@ -22,6 +23,16 @@ export function useEntryRoute(): EntryRoute {
     async function resolverDestino() {
       try {
         const onboardingCompleted = await getOnboardingCompleted(session!.user.id)
+
+        // perfil não existe mais (ex.: usuário apagado no painel do Supabase
+        // com a sessão ainda salva no aparelho) — sessão órfã, força logout
+        // local em vez de deixar o erro estourar
+        if (onboardingCompleted === null) {
+          await signOut()
+          if (!cancelado) setRoute('/(auth)/login')
+          return
+        }
+
         if (!onboardingCompleted) {
           if (!cancelado) setRoute('/(onboarding)')
           return

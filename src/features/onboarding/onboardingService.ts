@@ -10,7 +10,7 @@ export async function getOnboardingCompleted(userId: string) {
     .from('profiles')
     .select('onboarding_completed')
     .eq('id', userId)
-    .single()
+    .maybeSingle()
   if (error) throw error
-  return data.onboarding_completed as boolean
+  return data ? (data.onboarding_completed as boolean) : null
 }
