@@ -1,8 +1,12 @@
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
+import { useLocalSearchParams } from 'expo-router'
+import { useEffect, useState } from 'react'
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
 import { BotaoMenu } from '../../components/BotaoMenu'
 import { Button } from '../../components/Button'
 import { Card } from '../../components/Card'
 import { useHabitos } from './useHabitos'
+
+const DURACAO_CONFIRMACAO_MS = 6000
 
 function formatarMoeda(valor: number) {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -13,7 +17,16 @@ function formatarData(data: string) {
 }
 
 export function HabitosScreen() {
-  const { perfil, perfilCalculadoEm, topCategoria, isLoading, isCalculando, error, calcular } = useHabitos()
+  const { triagemConcluida } = useLocalSearchParams<{ triagemConcluida?: string }>()
+  const [mostrarConfirmacao, setMostrarConfirmacao] = useState(Boolean(triagemConcluida))
+  const { perfil, perfilCalculadoEm, topCategoria, isLoading, isCalculando, aguardandoPrimeiroCalculo, error, calcular } =
+    useHabitos(Boolean(triagemConcluida))
+
+  useEffect(() => {
+    if (!mostrarConfirmacao) return
+    const timeout = setTimeout(() => setMostrarConfirmacao(false), DURACAO_CONFIRMACAO_MS)
+    return () => clearTimeout(timeout)
+  }, [mostrarConfirmacao])
 
   return (
     <ScrollView
@@ -24,6 +37,17 @@ export function HabitosScreen() {
         <Text className="text-2xl font-semibold text-text-primary dark:text-text-primary-dark">Hábitos</Text>
         <BotaoMenu />
       </View>
+
+      {mostrarConfirmacao && (
+        <Card className="flex-row items-center justify-between gap-12 border-primary">
+          <Text className="flex-1 text-text-primary dark:text-text-primary-dark">
+            Boa! Triagem concluída — seu perfil está sendo preparado bem aqui embaixo.
+          </Text>
+          <Pressable onPress={() => setMostrarConfirmacao(false)} hitSlop={12}>
+            <Text className="text-text-secondary dark:text-text-secondary-dark">✕</Text>
+          </Pressable>
+        </Card>
+      )}
 
       {error ? <Text className="text-error">{error}</Text> : null}
 
@@ -88,6 +112,13 @@ export function HabitosScreen() {
               )}
 
               <Button label="Recalcular perfil" variant="secondary" onPress={calcular} loading={isCalculando} />
+            </Card>
+          ) : aguardandoPrimeiroCalculo ? (
+            <Card className="flex-row items-center gap-12">
+              <ActivityIndicator />
+              <Text className="flex-1 text-text-secondary dark:text-text-secondary-dark">
+                Calculando seu perfil...
+              </Text>
             </Card>
           ) : (
             <Card className="gap-12">
