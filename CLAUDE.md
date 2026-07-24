@@ -45,6 +45,17 @@ Nunca iniciar código sem que o plano técnico tenha sido aprovado.
 
 ---
 
+# Loop de aprendizado
+
+O projeto mantém um `LICOES_APRENDIDAS.md` na raiz do repositório, com bugs não triviais já enfrentados: sintoma, causa raiz e lição.
+
+1. Antes de iniciar qualquer tarefa nova, consultar o `LICOES_APRENDIDAS.md` para verificar se algum padrão já documentado é relevante para o que está prestes a ser implementado.
+2. Depois de corrigir um bug não trivial (algo que exigiu investigação real, não um erro de digitação óbvio), adicionar uma entrada nova ao arquivo, no mesmo formato das existentes: Sintoma, Causa raiz, Lição. Isso deve fazer parte do commit da própria correção, não ser tratado como tarefa separada.
+
+Não usar ferramentas externas nem dependências novas para isso — é só um arquivo markdown lido e escrito como qualquer outro documento do projeto.
+
+---
+
 # Antes de implementar qualquer funcionalidade
 
 Sempre verificar:
