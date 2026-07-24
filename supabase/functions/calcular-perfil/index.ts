@@ -60,25 +60,27 @@ Esse princípio vale para todo texto que você gerar aqui — resumo, pontos_ate
 
 type Respostas = {
   perfil_gasto: string
-  gatilho_principal: string
-  momento_gasto: string
-  atividade_prazer: string
+  gatilho_principal: string[]
+  momento_gasto: string[]
+  atividade_prazer: string[]
   atividade_prazer_outro?: string
   atividade_prazer_detalhe?: string
   frequencia_planejamento: string
 }
 
-function montarPrompt(respostas: Respostas) {
-  const atividade =
-    respostas.atividade_prazer === 'outro' && respostas.atividade_prazer_outro
-      ? respostas.atividade_prazer_outro
-      : LABELS.atividade_prazer[respostas.atividade_prazer]
+// gatilho_principal, momento_gasto e atividade_prazer são seleção múltipla —
+// junta os rótulos numa lista legível; "outro" (só existe em atividade_prazer)
+// é substituído pelo texto livre da pessoa, quando houver
+function rotularLista(valores: string[], labels: Record<string, string>, outro?: string) {
+  return valores.map((valor) => (valor === 'outro' && outro ? outro : (labels[valor] ?? valor))).join(', ')
+}
 
+function montarPrompt(respostas: Respostas) {
   const linhas = [
     `Relação com dinheiro: ${LABELS.perfil_gasto[respostas.perfil_gasto]}`,
-    `Principal gatilho de gasto sem planejar: ${LABELS.gatilho_principal[respostas.gatilho_principal]}`,
-    `Onde o gasto por impulso mais acontece: ${LABELS.momento_gasto[respostas.momento_gasto]}`,
-    `O que gosta de fazer para relaxar/se recompensar: ${atividade}`,
+    `Principais gatilhos de gasto sem planejar: ${rotularLista(respostas.gatilho_principal, LABELS.gatilho_principal)}`,
+    `Onde o gasto por impulso mais acontece: ${rotularLista(respostas.momento_gasto, LABELS.momento_gasto)}`,
+    `O que gosta de fazer para relaxar/se recompensar: ${rotularLista(respostas.atividade_prazer, LABELS.atividade_prazer, respostas.atividade_prazer_outro)}`,
     respostas.atividade_prazer_detalhe ? `Detalhe sobre essa atividade: ${respostas.atividade_prazer_detalhe}` : null,
     `Planejamento dos gastos do mês: ${LABELS.frequencia_planejamento[respostas.frequencia_planejamento]}`,
   ].filter(Boolean)

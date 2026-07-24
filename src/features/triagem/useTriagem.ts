@@ -18,7 +18,12 @@ export function useTriagem() {
   const pergunta = PERGUNTAS[stepIndex]
   const isFirstStep = stepIndex === 0
   const isLastStep = stepIndex === PERGUNTAS.length - 1
-  const podeAvancar = pergunta.tipo === 'texto' || Boolean(respostas[pergunta.id])
+  const podeAvancar =
+    pergunta.tipo === 'texto'
+      ? true
+      : pergunta.multipla
+        ? ((respostas[pergunta.id] as string[] | undefined)?.length ?? 0) > 0
+        : Boolean(respostas[pergunta.id])
 
   function voltar() {
     if (isFirstStep) return
@@ -27,6 +32,16 @@ export function useTriagem() {
 
   function selecionarOpcao(value: string) {
     if (pergunta.tipo !== 'escolha') return
+
+    if (pergunta.multipla) {
+      setRespostas((atual) => {
+        const atuais = (atual[pergunta.id] as string[] | undefined) ?? []
+        const novos = atuais.includes(value) ? atuais.filter((item) => item !== value) : [...atuais, value]
+        return { ...atual, [pergunta.id]: novos }
+      })
+      return
+    }
+
     setRespostas((atual) => ({ ...atual, [pergunta.id]: value }))
   }
 
@@ -55,7 +70,9 @@ export function useTriagem() {
       // dispara em segundo plano — não bloqueia a entrada no app; se falhar,
       // a tela Hábitos oferece o botão "Calcular meu perfil" como retry manual
       calcularPerfil().catch((err) => console.error('[useTriagem] falha ao calcular perfil:', err))
-      router.replace('/(app)')
+      // vai direto pra Hábitos (não Dashboard): é onde o perfil recém-calculado
+      // aparece, fechando o ciclo da triagem no mesmo momento
+      router.replace({ pathname: '/(app)/(tabs)/habitos', params: { triagemConcluida: '1' } })
     } catch (err) {
       console.error('[useTriagem] falha ao salvar triagem:', err)
       setError('Não foi possível salvar suas respostas. Tente novamente.')

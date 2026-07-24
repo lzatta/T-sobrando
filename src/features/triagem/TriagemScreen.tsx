@@ -34,12 +34,16 @@ export function TriagemScreen() {
             <OpcaoCard
               key={opcao.value}
               label={opcao.label}
-              selected={respostas[pergunta.id] === opcao.value}
+              selected={
+                pergunta.multipla
+                  ? ((respostas[pergunta.id] as string[] | undefined)?.includes(opcao.value) ?? false)
+                  : respostas[pergunta.id] === opcao.value
+              }
               onPress={() => selecionarOpcao(opcao.value)}
             />
           ))}
 
-          {pergunta.id === 'atividade_prazer' && respostas.atividade_prazer === 'outro' && (
+          {pergunta.id === 'atividade_prazer' && respostas.atividade_prazer?.includes('outro') && (
             <TextInput
               placeholder="Conte com suas palavras"
               placeholderTextColor="#9AA6A0"

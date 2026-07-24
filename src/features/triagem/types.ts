@@ -2,9 +2,15 @@ import { z } from 'zod'
 
 export const triagemRespostasSchema = z.object({
   perfil_gasto: z.enum(['impulso', 'controle_parcial', 'organizado_quer_economizar', 'dificuldade_acompanhar']),
-  gatilho_principal: z.enum(['estresse', 'promocoes', 'pressao_social', 'tedio', 'comemoracao']),
-  momento_gasto: z.enum(['compras_online_noite', 'delivery', 'compras_presenciais', 'assinaturas_esquecidas']),
-  atividade_prazer: z.enum(['series_filmes', 'esporte', 'cozinhar', 'ler', 'jogos', 'tempo_social', 'outro']),
+  gatilho_principal: z
+    .array(z.enum(['estresse', 'promocoes', 'pressao_social', 'tedio', 'comemoracao']))
+    .min(1, 'Selecione pelo menos uma opção'),
+  momento_gasto: z
+    .array(z.enum(['compras_online_noite', 'delivery', 'compras_presenciais', 'assinaturas_esquecidas']))
+    .min(1, 'Selecione pelo menos uma opção'),
+  atividade_prazer: z
+    .array(z.enum(['series_filmes', 'esporte', 'cozinhar', 'ler', 'jogos', 'tempo_social', 'outro']))
+    .min(1, 'Selecione pelo menos uma opção'),
   atividade_prazer_outro: z.string().optional(),
   atividade_prazer_detalhe: z.string().optional(),
   frequencia_planejamento: z.enum(['sempre', 'as_vezes', 'quase_nunca', 'nunca']),
@@ -19,6 +25,9 @@ export type PerguntaEscolha = {
   id: 'perfil_gasto' | 'gatilho_principal' | 'momento_gasto' | 'atividade_prazer' | 'frequencia_planejamento'
   texto: string
   opcoes: Opcao[]
+  // perfil_gasto e frequencia_planejamento descrevem um estado geral (seleção
+  // única); os outros três são itens que se acumulam (seleção múltipla)
+  multipla: boolean
 }
 
 export type PerguntaTexto = {
@@ -33,6 +42,7 @@ export const PERGUNTAS: Pergunta[] = [
   {
     tipo: 'escolha',
     id: 'perfil_gasto',
+    multipla: false,
     texto: 'Como você descreveria sua relação com dinheiro hoje?',
     opcoes: [
       { value: 'impulso', label: 'Costumo gastar por impulso' },
@@ -44,7 +54,8 @@ export const PERGUNTAS: Pergunta[] = [
   {
     tipo: 'escolha',
     id: 'gatilho_principal',
-    texto: 'O que mais te leva a gastar sem planejar?',
+    multipla: true,
+    texto: 'O que mais te leva a gastar sem planejar? (pode escolher mais de uma)',
     opcoes: [
       { value: 'estresse', label: 'Estresse ou ansiedade' },
       { value: 'promocoes', label: 'Promoções e ofertas' },
@@ -56,7 +67,8 @@ export const PERGUNTAS: Pergunta[] = [
   {
     tipo: 'escolha',
     id: 'momento_gasto',
-    texto: 'Onde o gasto por impulso mais acontece?',
+    multipla: true,
+    texto: 'Onde o gasto por impulso mais acontece? (pode escolher mais de uma)',
     opcoes: [
       { value: 'compras_online_noite', label: 'Compras online à noite' },
       { value: 'delivery', label: 'Delivery de comida' },
@@ -67,7 +79,8 @@ export const PERGUNTAS: Pergunta[] = [
   {
     tipo: 'escolha',
     id: 'atividade_prazer',
-    texto: 'O que você gosta de fazer para relaxar ou se recompensar?',
+    multipla: true,
+    texto: 'O que você gosta de fazer para relaxar ou se recompensar? (pode escolher mais de uma)',
     opcoes: [
       { value: 'series_filmes', label: 'Assistir séries/filmes' },
       { value: 'esporte', label: 'Praticar esporte ou exercício' },
@@ -86,6 +99,7 @@ export const PERGUNTAS: Pergunta[] = [
   {
     tipo: 'escolha',
     id: 'frequencia_planejamento',
+    multipla: false,
     texto: 'Você costuma planejar os gastos do mês?',
     opcoes: [
       { value: 'sempre', label: 'Sempre' },
