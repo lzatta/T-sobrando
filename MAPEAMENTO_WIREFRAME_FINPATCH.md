@@ -79,6 +79,8 @@ O modelo original de tipos genéricos (conta corrente, carteira, poupança, cart
 
 Como o tipo `carteira` foi removido, a automação que cria uma conta "Carteira" no signup também precisa mudar. Sugestão em avaliação: manter a criação automática de uma conta padrão no cadastro (baixa fricção continua importante), mas renomeada para algo genérico tipo "Minha conta principal", sem banco/tipo fixo pré-definido, que o usuário edita depois com os dados reais.
 
+**Nota de atualização:** essa seção foi posteriormente substituída — "Contas" foi removida por completo e virou um campo de instituição diretamente na transação (ver histórico de conversas para o prompt de remoção). Mantida aqui como registro histórico da decisão intermediária.
+
 ## 7. Ideias futuras — visualizações gráficas do dashboard (não implementado ainda)
 
 Surgiram durante o teste da Sprint 2:
@@ -92,3 +94,13 @@ Surgiram durante o teste da Sprint 2:
 **Gráfico de linha — evolução patrimonial:** mostrando como o patrimônio total do usuário cresce ou diminui ao longo dos meses, já que o patrimônio passou a ser um acumulado histórico (ver correção aplicada), não um valor do mês corrente.
 
 Registrado como ideia de produto validada, mas não priorizada para implementação imediata — envolve escolha de biblioteca de gráfico (ou SVG customizado) e, no caso dos gráficos de pizza, gesto de swipe entre telas sobrepostas. Faz sentido avaliar as duas necessidades (pizza + linha) juntas na hora de escolher a biblioteca, para não decidir isso duas vezes separadas.
+
+## 8. Ideias futuras — BrasilAPI (dados públicos brasileiros, gratuito, sem chave)
+
+Identificado como um recurso legítimo e específico para o Brasil, não priorizado para implementação imediata:
+
+**Lista de bancos sempre atualizada:** hoje o campo "Instituição" (em Transações) usa uma lista fixa mantida manualmente (~14 bancos + "Outro"). O endpoint `/api/banks/v1` da BrasilAPI retorna a lista completa e oficial de instituições financeiras registradas no Banco Central, sem necessidade de manutenção manual. Poderia substituir ou complementar a lista fixa atual.
+
+**Tabela FIPE (preço de veículos):** a tela de Patrimônio permite cadastrar um veículo com "valor estimado" digitado livremente pelo usuário. A Tabela FIPE (também disponível via BrasilAPI) é a referência oficial de preço de carro usado no Brasil — poderia ser usada para sugerir ou validar um valor mais preciso na hora de cadastrar um veículo como bem, em vez de depender só de estimativa manual.
+
+Ambas são gratuitas, sem necessidade de chave de API, mantidas por projeto comunitário brasileiro (brasilapi.com.br) — sem custo nem complexidade de autenticação para adotar quando fizer sentido.
