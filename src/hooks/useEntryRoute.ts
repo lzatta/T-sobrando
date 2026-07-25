@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AppState } from 'react-native'
 import { signOut } from '../features/auth/authService'
 import { getOnboardingCompleted } from '../features/onboarding/onboardingService'
 import { getTriagemRespostas } from '../features/triagem/triagemService'
@@ -9,6 +10,23 @@ export type EntryRoute = 'loading' | '/(auth)/login' | '/(onboarding)' | '/(tria
 export function useEntryRoute(): EntryRoute {
   const { session, isLoading } = useSession()
   const [route, setRoute] = useState<EntryRoute>('loading')
+
+  // incrementa a cada vez que o app volta a ficar ativo (retomado do
+  // background), forçando o efeito abaixo a rodar de novo mesmo com
+  // session/isLoading inalterados — cobre o caso de o app ter sido só
+  // minimizado (não reiniciado) enquanto o estado de onboarding/triagem
+  // mudou no banco nesse meio-tempo. Só tem efeito enquanto este hook está
+  // montado (ou seja, enquanto a rota ainda não foi resolvida para dentro de
+  // (app)/(onboarding)/(triagem) — depois de resolvido, este componente
+  // desmonta e retomar o app não passa mais por aqui).
+  const [retomadas, setRetomadas] = useState(0)
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (estado) => {
+      if (estado === 'active') setRetomadas((atual) => atual + 1)
+    })
+    return () => subscription.remove()
+  }, [])
 
   useEffect(() => {
     if (isLoading) return
@@ -54,7 +72,7 @@ export function useEntryRoute(): EntryRoute {
     return () => {
       cancelado = true
     }
-  }, [session, isLoading])
+  }, [session, isLoading, retomadas])
 
   return route
 }
