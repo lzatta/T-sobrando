@@ -47,16 +47,33 @@ const corsHeaders = {
 }
 
 // Texto extraído literalmente de PRODUCT.md > "Tom das recomendações".
-// Vale pra todo texto gerado aqui (resumo, pontos_atencao, recomendacao_geral) —
-// o próprio PRODUCT.md diz que o princípio cobre "qualquer cálculo derivado da
-// triagem que gere texto voltado ao usuário", não só a recomendação.
+// Vale pra todo texto gerado aqui (resumo, pontos_atencao, recomendacao_geral,
+// e agora também os campos de pares_habito) — o próprio PRODUCT.md diz que o
+// princípio cobre "qualquer cálculo derivado da triagem que gere texto voltado
+// ao usuário", não só a recomendação.
 const TOM_RECOMENDACOES = `Toda sugestão de substituição de hábito gerada pela IA deve ser comunicada como ganho, nunca como restrição disfarçada. Em vez de descrever o que a pessoa deixa de gastar ou de fazer, descrever o que ela ganha ao trocar a rotina, mantendo o tom próximo e sem soar como conselho genérico de app financeiro tradicional.
 
 Exemplo do que evitar: "Socialize sem gastar."
 
 Exemplo do tom esperado: "Você curte sair com os amigos — dá para manter isso vivo sem pesar no orçamento. Que tal sugerir um point na casa de alguém dessa vez?"
 
-Esse princípio vale para todo texto que você gerar aqui — resumo, pontos_atencao e recomendacao_geral — não só para a recomendação final.`
+Esse princípio vale para todo texto que você gerar aqui — resumo, pontos_atencao, recomendacao_geral e todos os campos de pares_habito (especialmente beneficio_vida) — não só para a recomendação final.`
+
+// Base de psicologia comportamental — obrigatória para os pares de hábito.
+// Frameworks reconhecidos, não invenção da IA: cite-os implicitamente através
+// da estrutura dos campos pedidos, sem citar os nomes dos autores no texto
+// exibido ao usuário (isso é orientação de raciocínio interno, não conteúdo).
+const BASE_COMPORTAMENTAL = `Ao gerar os pares de hábito (habito_ruim / habito_substituto), fundamente-se explicitamente nestes frameworks reconhecidos de psicologia comportamental:
+
+- Loop do hábito (Charles Duhigg, "O Poder do Hábito"): todo hábito tem uma deixa (gatilho), uma rotina e uma recompensa. Nunca sugira eliminar um hábito — sempre substitua a rotina mantendo a MESMA deixa e uma recompensa psicologicamente equivalente. Por isso o campo "gatilho" do hábito substituto deve repetir o gatilho do hábito ruim sempre que fizer sentido.
+- Sistema 1 / Sistema 2 (Daniel Kahneman, "Rápido e Devagar"): no momento do gatilho, a decisão é dominada pelo Sistema 1 (rápido, automático, emocional) — por isso o substituto precisa ser algo escolhível no calor do momento, não uma decisão que dependa de força de vontade racional (Sistema 2).
+- Modelo de comportamento B=MAP (BJ Fogg): um comportamento só acontece quando motivação, habilidade (facilidade de execução) e um gatilho coincidem no mesmo momento. O hábito substituto precisa ser fácil de iniciar bem ali, no momento do gatilho — não algo que exija preparo ou planejamento prévio.
+
+Gere entre 1 e 4 pares — um por padrão de comportamento realmente distinto identificável nas respostas, não um par para cada opção marcada (várias respostas podem apontar para o mesmo padrão real). Ordene os pares da maior prioridade sugerida para a menor: o índice no array vira a prioridade inicial exibida ao usuário, que pode reordenar livremente depois.`
+
+const AJUSTES_DE_FORMATO = `Gere todo o texto direto, sem aspas ao redor das frases — as aspas usadas nos exemplos acima são só ilustração de tom, não fazem parte da formatação esperada.
+
+Cada campo do perfil (resumo, pontos_fortes, pontos_atencao, recomendacao_geral) deve trazer uma ideia distinta das demais — nunca reformule o mesmo ponto ou o mesmo exemplo em mais de um campo.`
 
 type Respostas = {
   perfil_gasto: string
@@ -148,36 +165,89 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        system: TOM_RECOMENDACOES,
-        tool_choice: { type: 'tool', name: 'registrar_perfil' },
+        max_tokens: 2048,
+        system: [TOM_RECOMENDACOES, AJUSTES_DE_FORMATO, BASE_COMPORTAMENTAL].join('\n\n'),
+        tool_choice: { type: 'tool', name: 'registrar_perfil_e_habitos' },
         tools: [
           {
-            name: 'registrar_perfil',
-            description: 'Registra o diagnóstico do perfil comportamental financeiro do usuário.',
+            name: 'registrar_perfil_e_habitos',
+            description:
+              'Registra o diagnóstico do perfil comportamental financeiro do usuário e os pares de hábito ruim/substituto sugeridos.',
             input_schema: {
               type: 'object',
               properties: {
-                resumo: {
-                  type: 'string',
-                  description: 'Resumo curto (2-3 frases) do padrão de comportamento financeiro do usuário.',
+                perfil: {
+                  type: 'object',
+                  properties: {
+                    resumo: {
+                      type: 'string',
+                      description: 'Resumo curto (2-3 frases) do padrão de comportamento financeiro do usuário.',
+                    },
+                    pontos_fortes: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: '1 a 3 pontos fortes identificados nas respostas.',
+                    },
+                    pontos_atencao: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: '1 a 3 pontos de atenção, sempre no tom de ganho.',
+                    },
+                    recomendacao_geral: {
+                      type: 'string',
+                      description: 'Uma recomendação geral e prática, no tom de ganho.',
+                    },
+                  },
+                  required: ['resumo', 'pontos_fortes', 'pontos_atencao', 'recomendacao_geral'],
                 },
-                pontos_fortes: {
+                pares_habito: {
                   type: 'array',
-                  items: { type: 'string' },
-                  description: '1 a 3 pontos fortes identificados nas respostas.',
-                },
-                pontos_atencao: {
-                  type: 'array',
-                  items: { type: 'string' },
-                  description: '1 a 3 pontos de atenção, sempre no tom de ganho.',
-                },
-                recomendacao_geral: {
-                  type: 'string',
-                  description: 'Uma recomendação geral e prática, no tom de ganho.',
+                  minItems: 1,
+                  maxItems: 4,
+                  description: 'Ordenado da maior prioridade sugerida para a menor.',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      habito_ruim: {
+                        type: 'object',
+                        properties: {
+                          nome: { type: 'string', description: 'Nome curto do hábito ruim identificado.' },
+                          tipo: { type: 'string', description: 'Frase curta descrevendo a natureza desse hábito.' },
+                          gatilho: { type: 'string', description: 'A deixa que dispara esse hábito.' },
+                          recompensa: {
+                            type: 'string',
+                            description: 'O que a pessoa ganha psicologicamente hoje ao ceder a esse hábito.',
+                          },
+                        },
+                        required: ['nome', 'tipo', 'gatilho', 'recompensa'],
+                      },
+                      habito_substituto: {
+                        type: 'object',
+                        properties: {
+                          nome: { type: 'string', description: 'Nome curto do hábito substituto sugerido.' },
+                          tipo: { type: 'string', description: 'Frase curta descrevendo a natureza desse hábito.' },
+                          gatilho: {
+                            type: 'string',
+                            description: 'Idealmente o mesmo gatilho do hábito ruim correspondente.',
+                          },
+                          recompensa: {
+                            type: 'string',
+                            description: 'A recompensa psicologicamente equivalente que esse hábito entrega.',
+                          },
+                          beneficio_vida: {
+                            type: 'string',
+                            description:
+                              'O que esse hábito ajuda a alcançar na vida da pessoa — conexão com uma meta ou benefício de vida maior, não só financeiro.',
+                          },
+                        },
+                        required: ['nome', 'tipo', 'gatilho', 'recompensa', 'beneficio_vida'],
+                      },
+                    },
+                    required: ['habito_ruim', 'habito_substituto'],
+                  },
                 },
               },
-              required: ['resumo', 'pontos_fortes', 'pontos_atencao', 'recomendacao_geral'],
+              required: ['perfil', 'pares_habito'],
             },
           },
         ],
@@ -194,17 +264,43 @@ Deno.serve(async (req) => {
     const blocoFerramenta = dadosAnthropic.content?.find((bloco: { type: string }) => bloco.type === 'tool_use')
     if (!blocoFerramenta) throw new Error('A IA não retornou o perfil no formato esperado.')
 
-    const perfilCalculado = blocoFerramenta.input
-    const perfilCalculadoEm = new Date().toISOString()
+    const perfilCalculado = blocoFerramenta.input.perfil
+    const paresHabito = blocoFerramenta.input.pares_habito as Array<{
+      habito_ruim: Record<string, string>
+      habito_substituto: Record<string, string>
+    }>
+    const geradoEm = new Date().toISOString()
 
     const { error: erroUpdate } = await supabase
       .from('triagem_respostas')
-      .update({ perfil_calculado: perfilCalculado, perfil_calculado_em: perfilCalculadoEm })
+      .update({ perfil_calculado: perfilCalculado, perfil_calculado_em: geradoEm })
       .eq('user_id', user.id)
 
     if (erroUpdate) throw erroUpdate
 
-    return new Response(JSON.stringify({ perfilCalculado, perfilCalculadoEm }), {
+    // substitui os pares por completo a cada geração — prioridade é editável
+    // pelo usuário e não há hoje nenhum fluxo de "refazer triagem" que exija
+    // preservar a ordem entre gerações (decisão registrada no plano técnico)
+    const { error: erroDelete } = await supabase.from('habit_pairs').delete().eq('user_id', user.id)
+    if (erroDelete) throw erroDelete
+
+    const linhasParaInserir = paresHabito.map((par, index) => ({
+      user_id: user.id,
+      habito_ruim: par.habito_ruim,
+      habito_substituto: par.habito_substituto,
+      prioridade: index,
+      gerado_em: geradoEm,
+    }))
+
+    const { data: pares, error: erroInsert } = await supabase
+      .from('habit_pairs')
+      .insert(linhasParaInserir)
+      .select('id, habito_ruim, habito_substituto, prioridade')
+      .order('prioridade', { ascending: true })
+
+    if (erroInsert) throw erroInsert
+
+    return new Response(JSON.stringify({ perfilCalculado, perfilCalculadoEm: geradoEm, pares }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
