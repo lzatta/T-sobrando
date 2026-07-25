@@ -112,3 +112,17 @@ Ambas são gratuitas, sem necessidade de chave de API, mantidas por projeto comu
 **Caminho 2 — WhatsApp, via número de teste gratuito da própria Meta:** a Meta Cloud API tem um número de teste que permite até 5 destinatários pré-cadastrados, sem custo de mensalidade de BSP (Business Solution Provider) — suficiente para validar com um grupo pequeno de usuários reais antes de decidir se vale investir num BSP pago para escalar. Mensagens dentro da janela de 24h de conversa (praticamente todo o caso de uso aqui — usuário manda mensagem, bot responde) são gratuitas, com folga de 1.000 conversas grátis por mês além do número de teste. Requer configuração técnica própria (webhook via Edge Function, sem painel visual de BSP), mas sem custo de mensalidade para a fase de validação.
 
 Os dois caminhos não competem — atendem preferências diferentes de uso (Siri para quem quer o mínimo de fricção possível, WhatsApp para quem prefere um canal de mensagem já familiar). Nenhum dos dois entra nesta fase do projeto — ambos ficam documentados para quando a Sprint correspondente chegar.
+
+## 10. Ideia futura — adicionar hábito manualmente via descrição livre + IA
+
+Surgiu ao testar a tela Hábitos: em vez de um formulário estruturado (gatilho, recompensa, tipo — fricção alta, exige que a pessoa pense como um especialista em comportamento), a pessoa descreve o hábito que quer mudar com as próprias palavras, com um campo opcional para já sugerir uma ideia de substituto.
+
+A IA então:
+
+- Se a pessoa não sugeriu substituto: gera o par completo sozinha, com base no perfil da triagem, mesma lógica já usada na geração automática.
+- Se a pessoa sugeriu algo: a IA usa como base, mas aplica os mesmos filtros de qualidade (Duhigg — mantém gatilho/recompensa; Fogg — é fácil de iniciar no momento do gatilho?), podendo refinar a sugestão, não só validar cegamente.
+- Se a descrição da pessoa não tiver informação suficiente para identificar gatilho/recompensa com confiança, a IA não deve inventar ou assumir — deve fazer uma ou mais perguntas de esclarecimento antes de gerar o par, para obter um resultado mais preciso em vez de uma suposição frágil.
+
+O novo par entra na lista com prioridade padrão (última posição), reordenável manualmente como os demais.
+
+Não implementar agora — a Sprint 4 já cresceu além do escopo original do ROADMAP.md com a estrutura de pares de hábito; esta adição fica para depois de testar e validar o que já está em implementação.
