@@ -87,3 +87,13 @@ Registro de bugs não triviais já enfrentados no projeto — sintoma, causa rai
 ## Migrations não aplicam automaticamente
 
 Padrão recorrente, não é bug: o ambiente onde o Claude Code roda não tem acesso de rede ao Supabase (nem para aplicar migrations, nem para ler logs de Edge Functions). Toda vez que uma sprint envolve tabela nova ou alteração de schema, a aplicação real no banco (via SQL Editor ou `supabase functions deploy`) é sempre um passo manual do Product Owner.
+
+---
+
+## Sucesso silencioso quando um array obrigatório vem vazio da IA
+
+**Sintoma:** Edge Function respondia `status_code: 200`, sem nenhum erro no log, mas a tabela `habit_pairs` ficava vazia — o perfil em texto era gerado normalmente, só os pares de hábito nunca apareciam.
+
+**Causa raiz:** o schema forçado (tool use) pedia `pares_habito` com `minItems: 1`, mas a API da Anthropic não garante esse tipo de restrição de array com o mesmo rigor que garante `required` em chaves de objeto — o modelo devolveu `pares_habito: []` em pelo menos uma chamada. Como o código nunca validava o tamanho do array antes de seguir, `[].map(...)` e `.insert([])` rodaram sem lançar nenhum erro, e a function terminou com sucesso (200) mesmo sem gravar nenhum par.
+
+**Lição:** `minItems`/`maxItems` num schema de tool use é uma instrução pro modelo, não uma garantia da API — sempre validar explicitamente no código (`array.length > 0`) antes de prosseguir, tratando array vazio como falha real (erro lançado, não sucesso silencioso). Quando o custo de tentar de novo é baixo (uma chamada de IA), vale um retry automático único antes de desistir, em vez de só confiar na primeira resposta.

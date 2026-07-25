@@ -110,6 +110,127 @@ function montarPrompt(respostas: Respostas) {
   ].join('\n')
 }
 
+const FERRAMENTA_PERFIL_E_HABITOS = {
+  name: 'registrar_perfil_e_habitos',
+  description: 'Registra o diagnóstico do perfil comportamental financeiro do usuário e os pares de hábito ruim/substituto sugeridos.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      perfil: {
+        type: 'object',
+        properties: {
+          resumo: {
+            type: 'string',
+            description: 'Resumo curto (2-3 frases) do padrão de comportamento financeiro do usuário.',
+          },
+          pontos_fortes: {
+            type: 'array',
+            items: { type: 'string' },
+            description: '1 a 3 pontos fortes identificados nas respostas.',
+          },
+          pontos_atencao: {
+            type: 'array',
+            items: { type: 'string' },
+            description: '1 a 3 pontos de atenção, sempre no tom de ganho.',
+          },
+          recomendacao_geral: {
+            type: 'string',
+            description: 'Uma recomendação geral e prática, no tom de ganho.',
+          },
+        },
+        required: ['resumo', 'pontos_fortes', 'pontos_atencao', 'recomendacao_geral'],
+      },
+      pares_habito: {
+        type: 'array',
+        minItems: 1,
+        maxItems: 4,
+        description: 'Ordenado da maior prioridade sugerida para a menor. Nunca pode vir vazio.',
+        items: {
+          type: 'object',
+          properties: {
+            habito_ruim: {
+              type: 'object',
+              properties: {
+                nome: { type: 'string', description: 'Nome curto do hábito ruim identificado.' },
+                tipo: { type: 'string', description: 'Frase curta descrevendo a natureza desse hábito.' },
+                gatilho: { type: 'string', description: 'A deixa que dispara esse hábito.' },
+                recompensa: {
+                  type: 'string',
+                  description: 'O que a pessoa ganha psicologicamente hoje ao ceder a esse hábito.',
+                },
+              },
+              required: ['nome', 'tipo', 'gatilho', 'recompensa'],
+            },
+            habito_substituto: {
+              type: 'object',
+              properties: {
+                nome: { type: 'string', description: 'Nome curto do hábito substituto sugerido.' },
+                tipo: { type: 'string', description: 'Frase curta descrevendo a natureza desse hábito.' },
+                gatilho: {
+                  type: 'string',
+                  description: 'Idealmente o mesmo gatilho do hábito ruim correspondente.',
+                },
+                recompensa: {
+                  type: 'string',
+                  description: 'A recompensa psicologicamente equivalente que esse hábito entrega.',
+                },
+                beneficio_vida: {
+                  type: 'string',
+                  description:
+                    'O que esse hábito ajuda a alcançar na vida da pessoa — conexão com uma meta ou benefício de vida maior, não só financeiro.',
+                },
+              },
+              required: ['nome', 'tipo', 'gatilho', 'recompensa', 'beneficio_vida'],
+            },
+          },
+          required: ['habito_ruim', 'habito_substituto'],
+        },
+      },
+    },
+    required: ['perfil', 'pares_habito'],
+  },
+}
+
+// isolado numa função própria pra poder tentar de novo (MAX_TENTATIVAS_IA) sem
+// duplicar a montagem da chamada — a IA às vezes devolve pares_habito vazio
+// mesmo com minItems: 1 no schema (a Anthropic não garante isso com rigor,
+// só required de chaves em objeto), então precisa ser validado aqui, não só
+// confiado ao schema
+async function chamarAnthropicParaPerfilEHabitos(apiKey: string, prompt: string) {
+  const resposta = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2048,
+      system: [TOM_RECOMENDACOES, AJUSTES_DE_FORMATO, BASE_COMPORTAMENTAL].join('\n\n'),
+      tool_choice: { type: 'tool', name: 'registrar_perfil_e_habitos' },
+      tools: [FERRAMENTA_PERFIL_E_HABITOS],
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  })
+
+  if (!resposta.ok) {
+    const textoErro = await resposta.text()
+    throw new Error(`Falha na API da Anthropic: ${resposta.status} ${textoErro}`)
+  }
+
+  const dados = await resposta.json()
+  const blocoFerramenta = dados.content?.find((bloco: { type: string }) => bloco.type === 'tool_use')
+  if (!blocoFerramenta) throw new Error('A IA não retornou o perfil no formato esperado.')
+
+  const perfilCalculado = blocoFerramenta.input.perfil
+  const paresHabito = blocoFerramenta.input.pares_habito as
+    | Array<{ habito_ruim: Record<string, string>; habito_substituto: Record<string, string> }>
+    | undefined
+
+  return { perfilCalculado, paresHabito: paresHabito ?? [] }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -156,119 +277,27 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
     if (!apiKey) throw new Error('ANTHROPIC_API_KEY não configurada.')
 
-    const respostaAnthropic = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2048,
-        system: [TOM_RECOMENDACOES, AJUSTES_DE_FORMATO, BASE_COMPORTAMENTAL].join('\n\n'),
-        tool_choice: { type: 'tool', name: 'registrar_perfil_e_habitos' },
-        tools: [
-          {
-            name: 'registrar_perfil_e_habitos',
-            description:
-              'Registra o diagnóstico do perfil comportamental financeiro do usuário e os pares de hábito ruim/substituto sugeridos.',
-            input_schema: {
-              type: 'object',
-              properties: {
-                perfil: {
-                  type: 'object',
-                  properties: {
-                    resumo: {
-                      type: 'string',
-                      description: 'Resumo curto (2-3 frases) do padrão de comportamento financeiro do usuário.',
-                    },
-                    pontos_fortes: {
-                      type: 'array',
-                      items: { type: 'string' },
-                      description: '1 a 3 pontos fortes identificados nas respostas.',
-                    },
-                    pontos_atencao: {
-                      type: 'array',
-                      items: { type: 'string' },
-                      description: '1 a 3 pontos de atenção, sempre no tom de ganho.',
-                    },
-                    recomendacao_geral: {
-                      type: 'string',
-                      description: 'Uma recomendação geral e prática, no tom de ganho.',
-                    },
-                  },
-                  required: ['resumo', 'pontos_fortes', 'pontos_atencao', 'recomendacao_geral'],
-                },
-                pares_habito: {
-                  type: 'array',
-                  minItems: 1,
-                  maxItems: 4,
-                  description: 'Ordenado da maior prioridade sugerida para a menor.',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      habito_ruim: {
-                        type: 'object',
-                        properties: {
-                          nome: { type: 'string', description: 'Nome curto do hábito ruim identificado.' },
-                          tipo: { type: 'string', description: 'Frase curta descrevendo a natureza desse hábito.' },
-                          gatilho: { type: 'string', description: 'A deixa que dispara esse hábito.' },
-                          recompensa: {
-                            type: 'string',
-                            description: 'O que a pessoa ganha psicologicamente hoje ao ceder a esse hábito.',
-                          },
-                        },
-                        required: ['nome', 'tipo', 'gatilho', 'recompensa'],
-                      },
-                      habito_substituto: {
-                        type: 'object',
-                        properties: {
-                          nome: { type: 'string', description: 'Nome curto do hábito substituto sugerido.' },
-                          tipo: { type: 'string', description: 'Frase curta descrevendo a natureza desse hábito.' },
-                          gatilho: {
-                            type: 'string',
-                            description: 'Idealmente o mesmo gatilho do hábito ruim correspondente.',
-                          },
-                          recompensa: {
-                            type: 'string',
-                            description: 'A recompensa psicologicamente equivalente que esse hábito entrega.',
-                          },
-                          beneficio_vida: {
-                            type: 'string',
-                            description:
-                              'O que esse hábito ajuda a alcançar na vida da pessoa — conexão com uma meta ou benefício de vida maior, não só financeiro.',
-                          },
-                        },
-                        required: ['nome', 'tipo', 'gatilho', 'recompensa', 'beneficio_vida'],
-                      },
-                    },
-                    required: ['habito_ruim', 'habito_substituto'],
-                  },
-                },
-              },
-              required: ['perfil', 'pares_habito'],
-            },
-          },
-        ],
-        messages: [{ role: 'user', content: montarPrompt(triagem.respostas as Respostas) }],
-      }),
-    })
+    const prompt = montarPrompt(triagem.respostas as Respostas)
 
-    if (!respostaAnthropic.ok) {
-      const textoErro = await respostaAnthropic.text()
-      throw new Error(`Falha na API da Anthropic: ${respostaAnthropic.status} ${textoErro}`)
+    const MAX_TENTATIVAS_IA = 2
+    // deno-lint-ignore no-explicit-any
+    let perfilCalculado: any
+    let paresHabito: Array<{ habito_ruim: Record<string, string>; habito_substituto: Record<string, string> }> = []
+
+    for (let tentativa = 1; tentativa <= MAX_TENTATIVAS_IA; tentativa++) {
+      const resultado = await chamarAnthropicParaPerfilEHabitos(apiKey, prompt)
+      perfilCalculado = resultado.perfilCalculado
+      paresHabito = resultado.paresHabito
+
+      if (paresHabito.length > 0) break
+
+      if (tentativa === MAX_TENTATIVAS_IA) {
+        throw new Error(`A IA não retornou nenhum par de hábito após ${MAX_TENTATIVAS_IA} tentativas.`)
+      }
+
+      console.error(`[calcular-perfil] tentativa ${tentativa} veio com pares_habito vazio, tentando de novo`)
     }
 
-    const dadosAnthropic = await respostaAnthropic.json()
-    const blocoFerramenta = dadosAnthropic.content?.find((bloco: { type: string }) => bloco.type === 'tool_use')
-    if (!blocoFerramenta) throw new Error('A IA não retornou o perfil no formato esperado.')
-
-    const perfilCalculado = blocoFerramenta.input.perfil
-    const paresHabito = blocoFerramenta.input.pares_habito as Array<{
-      habito_ruim: Record<string, string>
-      habito_substituto: Record<string, string>
-    }>
     const geradoEm = new Date().toISOString()
 
     const { error: erroUpdate } = await supabase
