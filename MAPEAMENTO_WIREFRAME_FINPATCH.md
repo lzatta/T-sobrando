@@ -126,3 +126,21 @@ A IA então:
 O novo par entra na lista com prioridade padrão (última posição), reordenável manualmente como os demais.
 
 Não implementar agora — a Sprint 4 já cresceu além do escopo original do ROADMAP.md com a estrutura de pares de hábito; esta adição fica para depois de testar e validar o que já está em implementação.
+
+## 11. Conexão entre hábitos, metas e dados financeiros reais — próximo passo natural após estabilizar os pares de hábito
+
+O campo `beneficio_vida` do hábito substituto deve deixar de ser uma frase genérica e passar a incluir, quando fizer sentido, uma projeção real conectada à vida do usuário — no mesmo espírito do que já existe em Metas ("esse aporte reduz sua meta em X dias").
+
+Importante: o exemplo de delivery + meta financeira é só uma ilustração de um tipo possível de conexão, não o único. A recompensa por adotar o hábito substituto nem sempre precisa estar amarrada a uma meta financeira específica — pode ser outro tipo de benefício real (mais tempo livre, menos ansiedade, mais qualidade de vida), dependendo do que o dado da pessoa sustentar. A lógica de fundo é sempre a mesma (baseado em dado real do app, nunca invenção da IA), mas a "moeda" da recompensa deve variar conforme o que fizer sentido para aquele hábito e aquela pessoa especificamente — não forçar todo hábito a se conectar com uma meta em dias.
+
+Princípio não negociável: a IA nunca inventa nem estima esse número — ela só recebe um valor já calculado deterministicamente e o transforma em frase humana, mesmo padrão de "IA não faz conta, só escreve texto" já usado no resto do produto.
+
+O cálculo em si usa dado real do próprio usuário: média de gasto na categoria relacionada ao hábito ruim (calculada a partir de `transactions`), projetada contra o tempo/valor necessário para a meta de maior prioridade (`goals`), quando essa conexão fizer sentido. Exemplo (ilustrativo, não literal, nem a única forma de conexão possível): usuário tem 4 transações de delivery no período — calcula a média, projeta quanto isso representaria acumulado ao longo do tempo, e quantos dias isso adiantaria a meta prioritária se fosse redirecionado para ela.
+
+Regra importante: se não houver dado suficiente ainda (poucas transações, conta muito nova) para calcular uma média minimamente confiável, a função deve esperar — não forçar uma recomendação com base fraca. Como o histórico de transações cresce rápido depois que a pessoa começa a usar o app no dia a dia, essa limitação deve ser temporária, resolvendo-se sozinha com o tempo de uso.
+
+Implicação técnica: a Edge Function `calcular-perfil` precisaria passar a ler também `transactions` e `goals`, não só a triagem — expansão real de escopo, não ajuste pequeno. Não implementar agora — primeiro estabilizar e testar por completo os pares de hábito e o bug de onboarding já em investigação.
+
+## 12. Ideia futura — check-ins periódicos para refinar o perfil comportamental ao longo do tempo
+
+Complementar à ideia acima: além da triagem inicial (feita uma vez, refazível manualmente), o app poderia fazer perguntas curtas periódicas (ex.: uma vez por mês) para refinar o entendimento do padrão de comportamento da pessoa ao longo do tempo — o perfil deixa de ser uma foto única e passa a evoluir com o uso real, combinando o que a pessoa responde nesses check-ins com o que o app já aprende sozinho através das transações reais registradas. Não implementar agora — registrado como direção de evolução futura do motor de hábitos, depois que a versão atual (triagem única + pares de hábito) estiver validada com uso real.
