@@ -104,3 +104,11 @@ Identificado como um recurso legítimo e específico para o Brasil, não prioriz
 **Tabela FIPE (preço de veículos):** a tela de Patrimônio permite cadastrar um veículo com "valor estimado" digitado livremente pelo usuário. A Tabela FIPE (também disponível via BrasilAPI) é a referência oficial de preço de carro usado no Brasil — poderia ser usada para sugerir ou validar um valor mais preciso na hora de cadastrar um veículo como bem, em vez de depender só de estimativa manual.
 
 Ambas são gratuitas, sem necessidade de chave de API, mantidas por projeto comunitário brasileiro (brasilapi.com.br) — sem custo nem complexidade de autenticação para adotar quando fizer sentido.
+
+## 9. Registro rápido por voz — dois caminhos complementares (não concorrentes)
+
+**Caminho 1 — Atalhos/Siri (iPhone):** frase de ativação personalizada aciona um Atalho que grava a fala, manda para um webhook (Edge Function), que usa IA para extrair valor/categoria/data e grava na transação. Mãos livres, sem abrir nenhum app. Já decidido anteriormente como caminho principal.
+
+**Caminho 2 — WhatsApp, via número de teste gratuito da própria Meta:** a Meta Cloud API tem um número de teste que permite até 5 destinatários pré-cadastrados, sem custo de mensalidade de BSP (Business Solution Provider) — suficiente para validar com um grupo pequeno de usuários reais antes de decidir se vale investir num BSP pago para escalar. Mensagens dentro da janela de 24h de conversa (praticamente todo o caso de uso aqui — usuário manda mensagem, bot responde) são gratuitas, com folga de 1.000 conversas grátis por mês além do número de teste. Requer configuração técnica própria (webhook via Edge Function, sem painel visual de BSP), mas sem custo de mensalidade para a fase de validação.
+
+Os dois caminhos não competem — atendem preferências diferentes de uso (Siri para quem quer o mínimo de fricção possível, WhatsApp para quem prefere um canal de mensagem já familiar). Nenhum dos dois entra nesta fase do projeto — ambos ficam documentados para quando a Sprint correspondente chegar.
