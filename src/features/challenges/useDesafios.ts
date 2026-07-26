@@ -2,29 +2,52 @@ import { useFocusEffect } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { getHabitoPares } from '../habitos/habitosService'
 import { useSession } from '../../stores/AuthContext'
-import { concluirDesafio, descartarDesafio, gerarDesafio, getDesafioAtivo, getHistoricoConcluidos } from './challengesService'
-import type { Desafio } from './types'
+import {
+  calcularConsistenciaHistorica,
+  calcularProximoMarco,
+  calcularStreakAtual,
+  deveMostrarConsolidacao,
+  jaFezCheckinHoje,
+} from './calcularCheckins'
+import {
+  atualizarMarcoPerguntado,
+  descartarDesafio,
+  gerarDesafio,
+  getCheckins,
+  getDesafioAtivo,
+  getHabitosConsolidados,
+  getHistoricoConcluidos,
+  marcarConsolidado,
+  registrarCheckin,
+} from './challengesService'
+import type { Checkin, Desafio, TipoCheckin } from './types'
 
 export function useDesafios() {
   const { session } = useSession()
   const [desafioAtivo, setDesafioAtivo] = useState<Desafio | null>(null)
-  const [historico, setHistorico] = useState<Desafio[]>([])
+  const [checkins, setCheckins] = useState<Checkin[]>([])
+  const [historicoConcluidos, setHistoricoConcluidos] = useState<Desafio[]>([])
+  const [historicoConsolidados, setHistoricoConsolidados] = useState<Desafio[]>([])
   const [temParesDisponiveis, setTemParesDisponiveis] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isGerando, setIsGerando] = useState(false)
+  const [isRegistrandoCheckin, setIsRegistrandoCheckin] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const carregar = useCallback(async () => {
     if (!session) return
     setIsLoading(true)
     try {
-      const [ativo, concluidos, pares] = await Promise.all([
+      const [ativo, concluidos, consolidados, pares] = await Promise.all([
         getDesafioAtivo(session.user.id),
         getHistoricoConcluidos(session.user.id),
+        getHabitosConsolidados(session.user.id),
         getHabitoPares(session.user.id),
       ])
       setDesafioAtivo(ativo)
-      setHistorico(concluidos)
+      setCheckins(ativo ? await getCheckins(ativo.id) : [])
+      setHistoricoConcluidos(concluidos)
+      setHistoricoConsolidados(consolidados)
       setTemParesDisponiveis(pares.length > 0)
       setError(null)
     } catch (err) {
@@ -48,6 +71,7 @@ export function useDesafios() {
     try {
       const desafio = await gerarDesafio(session.user.id)
       setDesafioAtivo(desafio)
+      setCheckins([])
     } catch (err) {
       console.error('[useDesafios] falha ao gerar desafio:', err)
       setError('Não foi possível gerar um desafio agora.')
@@ -56,17 +80,62 @@ export function useDesafios() {
     }
   }
 
-  async function concluir() {
-    if (!desafioAtivo) return
-    await concluirDesafio(desafioAtivo.id)
-    await carregar()
-  }
-
   async function descartar() {
     if (!desafioAtivo) return
     await descartarDesafio(desafioAtivo.id)
     await carregar()
   }
 
-  return { desafioAtivo, historico, temParesDisponiveis, isLoading, isGerando, error, gerar, concluir, descartar }
+  async function registrarCheckinAcao(tipo: TipoCheckin, descricao: string) {
+    if (!desafioAtivo || !session) return
+    setIsRegistrandoCheckin(true)
+    setError(null)
+    try {
+      await registrarCheckin(desafioAtivo.id, session.user.id, tipo, descricao.trim() || null)
+      setCheckins(await getCheckins(desafioAtivo.id))
+    } catch (err) {
+      console.error('[useDesafios] falha ao registrar check-in:', err)
+      setError('Não foi possível registrar o check-in agora.')
+    } finally {
+      setIsRegistrandoCheckin(false)
+    }
+  }
+
+  async function confirmarConsolidacao(automatico: boolean) {
+    if (!desafioAtivo) return
+    if (automatico) {
+      await marcarConsolidado(desafioAtivo.id)
+      await carregar()
+      return
+    }
+    const proximoMarco = calcularProximoMarco(desafioAtivo.ultimo_marco_perguntado)
+    await atualizarMarcoPerguntado(desafioAtivo.id, proximoMarco)
+    setDesafioAtivo({ ...desafioAtivo, ultimo_marco_perguntado: proximoMarco })
+  }
+
+  const streakAtual = calcularStreakAtual(checkins)
+  const consistenciaHistorica = desafioAtivo ? calcularConsistenciaHistorica(checkins, desafioAtivo.gerado_em) : 0
+  const jaCheckedInHoje = jaFezCheckinHoje(checkins)
+  const mostrarConsolidacao = desafioAtivo
+    ? deveMostrarConsolidacao(desafioAtivo.gerado_em, desafioAtivo.ultimo_marco_perguntado)
+    : false
+
+  return {
+    desafioAtivo,
+    streakAtual,
+    consistenciaHistorica,
+    jaCheckedInHoje,
+    mostrarConsolidacao,
+    historicoConcluidos,
+    historicoConsolidados,
+    temParesDisponiveis,
+    isLoading,
+    isGerando,
+    isRegistrandoCheckin,
+    error,
+    gerar,
+    descartar,
+    registrarCheckinAcao,
+    confirmarConsolidacao,
+  }
 }

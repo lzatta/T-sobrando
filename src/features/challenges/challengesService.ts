@@ -1,7 +1,8 @@
 import { supabase } from '../../services/supabase'
-import type { Desafio } from './types'
+import type { Checkin, Desafio, TipoCheckin } from './types'
 
-const CAMPOS_DESAFIO = 'id, titulo, descricao, status, habito_par_id, gerado_em, concluido_em'
+const CAMPOS_DESAFIO = 'id, titulo, descricao, status, origem, habito_par_id, ultimo_marco_perguntado, gerado_em, concluido_em'
+const CAMPOS_CHECKIN = 'id, challenge_id, data, tipo, descricao'
 
 export async function getDesafioAtivo(userId: string) {
   const { data, error } = await supabase
@@ -21,6 +22,17 @@ export async function getHistoricoConcluidos(userId: string) {
     .eq('user_id', userId)
     .eq('status', 'concluido')
     .order('concluido_em', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as Desafio[]
+}
+
+export async function getHabitosConsolidados(userId: string) {
+  const { data, error } = await supabase
+    .from('challenges')
+    .select(CAMPOS_DESAFIO)
+    .eq('user_id', userId)
+    .eq('status', 'consolidado')
+    .order('updated_at', { ascending: false })
   if (error) throw error
   return (data ?? []) as Desafio[]
 }
@@ -56,15 +68,45 @@ export async function gerarDesafio(userId: string) {
   return desafio as Desafio
 }
 
-export async function concluirDesafio(id: string) {
-  const { error } = await supabase
-    .from('challenges')
-    .update({ status: 'concluido', concluido_em: new Date().toISOString() })
-    .eq('id', id)
+export async function descartarDesafio(id: string) {
+  const { error } = await supabase.from('challenges').update({ status: 'descartado' }).eq('id', id)
   if (error) throw error
 }
 
-export async function descartarDesafio(id: string) {
-  const { error } = await supabase.from('challenges').update({ status: 'descartado' }).eq('id', id)
+export async function marcarConsolidado(id: string) {
+  const { error } = await supabase.from('challenges').update({ status: 'consolidado' }).eq('id', id)
+  if (error) throw error
+}
+
+export async function atualizarMarcoPerguntado(id: string, marco: number) {
+  const { error } = await supabase.from('challenges').update({ ultimo_marco_perguntado: marco }).eq('id', id)
+  if (error) throw error
+}
+
+export async function getCheckins(challengeId: string) {
+  const { data, error } = await supabase
+    .from('habit_checkins')
+    .select(CAMPOS_CHECKIN)
+    .eq('challenge_id', challengeId)
+    .order('data', { ascending: true })
+  if (error) throw error
+  return (data ?? []) as Checkin[]
+}
+
+// upsert por (challenge_id, data): se a pessoa já fez o check-in de hoje e
+// mudar de ideia no mesmo dia, atualiza em vez de duplicar
+export async function registrarCheckin(
+  challengeId: string,
+  userId: string,
+  tipo: TipoCheckin,
+  descricao: string | null
+) {
+  const hojeISO = new Date().toISOString().slice(0, 10)
+  const { error } = await supabase
+    .from('habit_checkins')
+    .upsert(
+      { challenge_id: challengeId, user_id: userId, data: hojeISO, tipo, descricao: descricao || null },
+      { onConflict: 'challenge_id,data' }
+    )
   if (error) throw error
 }
